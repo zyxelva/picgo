@@ -70,22 +70,22 @@ var page = 1,
     offset = 0,
     nextLength = 0,
     nextDom = '';
-var tag='';
+var tag = '';
 var btnRemove = 0
 var memoDom = document.querySelector(memo.domId);
 var load = '<button class="load-btn button-load">努力加载中……</button>'
 if (memoDom) {
     memoDom.insertAdjacentHTML('afterend', load);
     getFirstList() // 首次加载数据
-	// 添加 button 事件监听器
-	btnRemove = 0;
+    // 添加 button 事件监听器
+    btnRemove = 0;
     var btn = document.querySelector("button.button-load");
     btn.addEventListener("click", function () {
         btn.textContent = '努力加载中……';
         updateHTMl(nextDom)
         if (nextLength < limit) { // 返回数据条数小于限制条数，隐藏
             document.querySelector("button.button-load").remove()
-			btnRemove = 1
+            btnRemove = 1
             return
         }
         getNextList()
@@ -99,7 +99,7 @@ function getFirstList() {
         var nowLength = resdata.data.length
         if (nowLength < limit) { // 返回数据条数小于 limit 则直接移除“加载更多”按钮，中断预加载
             document.querySelector("button.button-load").remove()
-			btnRemove = 1
+            btnRemove = 1
             return
         }
         page++
@@ -107,13 +107,14 @@ function getFirstList() {
         getNextList()
     });
 }
+
 // 预加载下一页数据
 function getNextList() {
-	if (tag){
-		var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset + "&tag=" + tag;
-	} else {
-		var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset;
-	}
+    if (tag) {
+        var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset + "&tag=" + tag;
+    } else {
+        var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset;
+    }
     fetch(memoUrl_next).then(res => res.json()).then(resdata => {
         nextDom = resdata.data
         nextLength = nextDom.length
@@ -121,7 +122,7 @@ function getNextList() {
         offset = limit * (page - 1)
         if (nextLength < 1) { // 返回数据条数为 0 ，隐藏
             document.querySelector("button.button-load").remove()
-			btnRemove = 1
+            btnRemove = 1
             return
         }
     })
@@ -130,50 +131,50 @@ function getNextList() {
 // 标签选择
 
 document.addEventListener('click', function (event) {
-	var target = event.target;
-	if (target.tagName.toLowerCase() === 'a' && target.getAttribute('href').startsWith('#')) {	
-		event.preventDefault();
-		tag = target.getAttribute('href').substring(1); // 获取标签名
-		if (btnRemove) {	// 如果 botton 被 remove
-			btnRemove = 0;
-			memoDom.insertAdjacentHTML('afterend', load);
-			// 添加 button 事件监听器
-			var btn = document.querySelector("button.button-load");
-			btn.addEventListener("click", function () {
-				btn.textContent = '努力加载中……';
-				updateHTMl(nextDom)
-				if (nextLength < limit) { // 返回数据条数小于限制条数，隐藏
-					document.querySelector("button.button-load").remove()
-					btnRemove = 1
-					return
-				}
-				getNextList()
-			});
-			
-		}		
-		getTagFirstList();
-		var filterElem = document.getElementById('tag-filter');
-		filterElem.style.display = 'block';	// 显示过滤器
-		var tags = document.getElementById('tags');
-		var tagresult = `Filter: <span class='tag-span'><a rel='noopener noreferrer' href=''>#${tag}</a></span>`
-		tags.innerHTML = tagresult;
-		scrollTo(0,0);	// 回到顶部
-	}
+    var target = event.target;
+    if (target.tagName.toLowerCase() === 'a' && target.getAttribute('href').startsWith('#')) {
+        event.preventDefault();
+        tag = target.getAttribute('href').substring(1); // 获取标签名
+        if (btnRemove) {	// 如果 botton 被 remove
+            btnRemove = 0;
+            memoDom.insertAdjacentHTML('afterend', load);
+            // 添加 button 事件监听器
+            var btn = document.querySelector("button.button-load");
+            btn.addEventListener("click", function () {
+                btn.textContent = '努力加载中……';
+                updateHTMl(nextDom)
+                if (nextLength < limit) { // 返回数据条数小于限制条数，隐藏
+                    document.querySelector("button.button-load").remove()
+                    btnRemove = 1
+                    return
+                }
+                getNextList()
+            });
+
+        }
+        getTagFirstList();
+        var filterElem = document.getElementById('tag-filter');
+        filterElem.style.display = 'block';	// 显示过滤器
+        var tags = document.getElementById('tags');
+        var tagresult = `Filter: <span class='tag-span'><a rel='noopener noreferrer' href=''>#${tag}</a></span>`
+        tags.innerHTML = tagresult;
+        scrollTo(0, 0);	// 回到顶部
+    }
 });
 
 function getTagFirstList() {
-	page = 1;
+    page = 1;
     offset = 0;
     nextLength = 0;
     nextDom = '';
-	memoDom.innerHTML = "";
+    memoDom.innerHTML = "";
     var memoUrl_tag = memoUrl + "&limit=" + limit + "&tag=" + tag;
     fetch(memoUrl_tag).then(res => res.json()).then(resdata => {
         updateHTMl(resdata.data);
-		var nowLength = resdata.data.length
+        var nowLength = resdata.data.length
         if (nowLength < limit) { // 返回数据条数小于 limit 则直接移除“加载更多”按钮，中断预加载
             document.querySelector("button.button-load").remove()
-			btnRemove = 1
+            btnRemove = 1
             return
         }
         page++
@@ -213,7 +214,7 @@ function updateHTMl(data) {
         langPrefix: 'language-',
         highlight: function (code, lang) {
             const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
+            return hljs.highlight(code, {language}).value;
         },
     });
 
@@ -227,7 +228,7 @@ function updateHTMl(data) {
         // 在 index.html 引入 JS：<script type="text/javascript" src="assets/js/pangu.min.js?v=4.0.7"></script>
         // 把下面的 memoContREG = marked.parse(memoContREG) 改为：memoContREG = marked.parse(pangu.spacing(memoContREG))
 
-        memoContREG = marked.parse(memoContREG)
+        memoContREG = marked.parse(pangu.spacing(memoContREG))
             .replace(BILIBILI_REG, "<div class='video-wrapper'><iframe src='//player.bilibili.com/player.html?bvid=$1&as_wide=1&high_quality=1&danmaku=0' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' style='position:absolute;height:100%;width:100%;'></iframe></div>")
             .replace(YOUTUBE_REG, "<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/$1' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>")
             .replace(NETEASE_MUSIC_REG, "<meting-js auto='https://music.163.com/#/song?id=$1'></meting-js>")
@@ -249,20 +250,29 @@ function updateHTMl(data) {
                     resLink = resexlink
                 } else {
                     fileId = resourceList[j].publicId || resourceList[j].filename
-                    resLink = memos+'o/r/'+resourceList[j].id+'/'+fileId
+                    resLink = memos + 'o/r/' + resourceList[j].id + '/' + fileId
                 }
                 if (resType == 'image') {
-                    imgUrl += '<div class="resimg"><img loading="lazy" src="' + resLink + '"/></div>'
+                    imgUrl += '<div class="waterfall" id="encrypt-blog">' +
+                        '<a href=\"' + resLink + '\"' +
+                        '     rel=\"example_group\"' +
+                        '     data-fancybox=\"images\">' +
+                        '      <img src=\"' + resLink + '\"' +
+                        '       alt=pic>\n' +
+                        '    </a>' +
+                        ' </div>'
                     resImgLength = resImgLength + 1
                 }
                 if (resType !== 'image') {
                     resUrl += '<a target="_blank" rel="noreferrer" href="' + resLink + '">' + resourceList[j].filename + '</a>'
                 }
-            }
+            } //end of for
             if (imgUrl) {
                 var resImgGrid = ""
-                if (resImgLength !== 1) { var resImgGrid = "grid grid-" + resImgLength }
-                memoContREG += '<div class="resource-wrapper "><div class="images-wrapper">' + imgUrl + '</div></div>'
+                if (resImgLength !== 1) {
+                    var resImgGrid = "grid grid-" + resImgLength
+                }
+                memoContREG += '<div class="resource-wrapper "><div class="images-wrapper">' + imgUrl + '</div></div>';
             }
             if (resUrl) {
                 memoContREG += '<div class="resource-wrapper "><p class="datasource">' + resUrl + '</p></div>'
@@ -278,6 +288,7 @@ function updateHTMl(data) {
     // fetchDB()
     document.querySelector('button.button-load').textContent = '加载更多';
 }
+
 // Memos End
 
 // 解析豆瓣 Start
@@ -348,6 +359,7 @@ function bookShow(fetch_href, fetch_item) {
     qs_dom.parentNode.replaceChild(db_div, qs_dom);
     db_div.innerHTML = db_html
 }
+
 // 解析豆瓣 End
 
 // Images lightbox
@@ -395,9 +407,9 @@ themeToggle.addEventListener("click", () => {
     }
 
     window.localStorage &&
-        window.localStorage.setItem(
-            "theme",
-            document.body.classList.contains("dark-theme") ? "dark-theme" : "light-theme",
-        );
+    window.localStorage.setItem(
+        "theme",
+        document.body.classList.contains("dark-theme") ? "dark-theme" : "light-theme",
+    );
 });
 // Darkmode End
