@@ -591,3 +591,10 @@ blockquote {
 .filter{
 	display:none;
 }
+
+[type=checkbox]:not(:checked), [type=checkbox]:checked {
+    position: inherit !important;
+    opacity: 0.6;
+    pointer-events: none;
+    margin: 0px;
+}
