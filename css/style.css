@@ -244,7 +244,7 @@ blockquote {
     white-space: pre-wrap;
     border-radius: 0.25rem;
     background-color: var(--color-memos-pre-bg);
-    padding: 0.75rem;
+    padding: 0.75rem !important;
 }
 
 .memos__text code {
@@ -256,6 +256,7 @@ blockquote {
     font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
     font-size: .875rem;
     line-height: 1.5rem;
+    color: #3968ea;
 }
 
 .memos__text pre code {
