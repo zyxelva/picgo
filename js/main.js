@@ -134,7 +134,7 @@ document.addEventListener('click', function (event) {
     var target = event.target;
     if (target && target.tagName.toLowerCase() === 'a' && target.getAttribute('href') && target.getAttribute('href').startsWith('#')) {
         event.preventDefault();
-        tag = target.getAttribute('href').substring(1); // 获取标签名
+        tag = target.getAttribute('href').substring(1).trim(); // 获取标签名
         if (btnRemove) {	// 如果 botton 被 remove
             btnRemove = 0;
             memoDom.insertAdjacentHTML('afterend', load);
