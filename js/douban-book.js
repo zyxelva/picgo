@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         fetch(memoUrl).then(res => res.json()).then(resdata => {
             var doubanBookUpdated = resdata.data[0].updatedTs
-            if (doubanBookUpdated && localDoubanBookUpdated !== doubanBookUpdated) {
+            if (doubanBookUpdated && localDoubanBookUpdated != doubanBookUpdated) {
                 var doubanBookData = resdata.data
                 //开始布局
                 loadDoubanBook(doubanBookData, limit)
