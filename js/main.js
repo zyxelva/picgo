@@ -129,7 +129,6 @@ function getNextList() {
 }
 
 // 标签选择
-
 document.addEventListener('click', function (event) {
     var target = event.target;
     if (target && target.tagName.toLowerCase() === 'a' && target.getAttribute('href') && target.getAttribute('href').startsWith('#')) {
@@ -222,11 +221,12 @@ function updateHTMl(data) {
     for (var i = 0; i < data.length; i++) {
         var memoContREG = data[i].content
             .replace(TAG_REG, "<span class='tag-span'><a rel='noopener noreferrer' href='#$1'>#$1</a></span>")
-
         // For CJK language users
         // 用 PanguJS 自动处理中英文混合排版
         // 在 index.html 引入 JS：<script type="text/javascript" src="assets/js/pangu.min.js?v=4.0.7"></script>
         // 把下面的 memoContREG = marked.parse(memoContREG) 改为：memoContREG = marked.parse(pangu.spacing(memoContREG))
+        //如果用这个的话，会把【#说说】这种tag修改为【# 说说】，对于memos通过tag去过滤查询会有影响。
+        // 若仍然想使用pangu，可在136行末尾，加上【.trim()】，去除前后空格可解决。
 
         memoContREG = marked.parse(pangu.spacing(memoContREG))
             .replace(BILIBILI_REG, "<div class='video-wrapper'><iframe src='//player.bilibili.com/player.html?bvid=$1&as_wide=1&high_quality=1&danmaku=0' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' style='position:absolute;height:100%;width:100%;'></iframe></div>")
@@ -285,7 +285,7 @@ function updateHTMl(data) {
     resultAll = memoBefore + memoResult + memoAfter
     memoDom.insertAdjacentHTML('beforeend', resultAll);
     //取消这行注释解析豆瓣电影和豆瓣阅读
-    // fetchDB()
+    fetchDB()
     document.querySelector('button.button-load').textContent = '加载更多';
 }
 
@@ -296,7 +296,7 @@ function updateHTMl(data) {
 // 解析豆瓣必须要API，请找朋友要权限，或自己按 https://github.com/eallion/douban-api-rs 这个架设 API，非常简单，资源消耗很少
 // 已内置样式，修改 API 即可使用
 function fetchDB() {
-    var dbAPI = "https://api.example.com/";  // 修改为自己的 API
+    var dbAPI = "https://douban-api.edui.fun/";  // 修改为自己的 API
     var dbA = document.querySelectorAll(".timeline a[href*='douban.com/subject/']:not([rel='noreferrer'])") || '';
     if (dbA) {
         for (var i = 0; i < dbA.length; i++) {
@@ -305,10 +305,10 @@ function fetchDB() {
             var db_reg = /^https\:\/\/(movie|book)\.douban\.com\/subject\/([0-9]+)\/?/;
             var db_type = dbHref.replace(db_reg, "$1");
             var db_id = dbHref.replace(db_reg, "$2").toString();
-            if (db_type == 'movie') {
+            if (db_type === 'movie') {
                 var this_item = 'movie' + db_id;
                 var url = dbAPI + "movies/" + db_id;
-                if (localStorage.getItem(this_item) == null || localStorage.getItem(this_item) == 'undefined') {
+                if (localStorage.getItem(this_item) == null || localStorage.getItem(this_item) === 'undefined') {
                     fetch(url).then(res => res.json()).then(data => {
                         let fetch_item = 'movies' + data.sid;
                         let fetch_href = "https://movie.douban.com/subject/" + data.sid + "/"
@@ -318,10 +318,10 @@ function fetchDB() {
                 } else {
                     movieShow(dbHref, this_item)
                 }
-            } else if (db_type == 'book') {
+            } else if (db_type === 'book') {
                 var this_item = 'book' + db_id;
                 var url = dbAPI + "v2/book/id/" + db_id;
-                if (localStorage.getItem(this_item) == null || localStorage.getItem(this_item) == 'undefined') {
+                if (localStorage.getItem(this_item) == null || localStorage.getItem(this_item) === 'undefined') {
                     fetch(url).then(res => res.json()).then(data => {
                         let fetch_item = 'book' + data.id;
                         let fetch_href = "https://book.douban.com/subject/" + data.id + "/"
