@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         fetch(memoUrl).then(res => res.json()).then(resdata => {
             var doubanMovieUpdated = resdata.data[0].updatedTs
-            if (doubanMovieUpdated && localDoubanMovieUpdated !== doubanMovieUpdated) {
+            if (doubanMovieUpdated && localDoubanMovieUpdated != doubanMovieUpdated) {
                 var doubanMovieData = resdata.data
                 doubanMovieDom.innerHTML = "";
                 //开始布局
