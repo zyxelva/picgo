@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         var memoUrl = memo.host + "api/memo?creatorId=" + memo.creatorId + "&tag=相册";
         let limit = numb || 8;
 
-        var localalbumUpdated = JSON.parse(localStorage.getItem("albumUpdated")) || '';
+        var localalbumUpdated = localStorage.getItem("albumUpdated") || '';
         var localalbumData = JSON.parse(localStorage.getItem("albumData")) || '';
         if (localalbumData) {
             loadAlbum2(localalbumData, limit)
