@@ -17,7 +17,9 @@ function whenDOMReady() {
         }
     }
     var memoUrl = memo.host + "api/memo?creatorId=" + memo.creatorId + "&tag=相册"
-    if (location.pathname == '/photos/') photos(memoUrl);
+    if (location.pathname === '/photos/') {
+        photos(memoUrl);
+    }
 }
 
 whenDOMReady()
@@ -25,7 +27,9 @@ document.addEventListener("pjax:complete", whenDOMReady)
 
 // 自适应
 window.onresize = () => {
-    if (location.pathname == '/photos/') waterfall('.gallery-photos');
+    if (location.pathname === '/photos/') {
+        waterfall('.gallery-photos');
+    }
 };
 
 // 函数
@@ -41,7 +45,7 @@ function photos(memoUrl) {
             if (item) {
                 let img = item.replace(/!\[.*?\]\((.*?)\)/g, '$1'),
                     time, title, tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
-                if (tat.indexOf(' ') != -1) {
+                if (tat.indexOf(' ') !== -1) {
                     time = tat.split(' ')[0];
                     title = tat.split(' ')[1];
                 } else title = tat
