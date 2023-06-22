@@ -4,6 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (bbDom) {
         memoTalks();
     }
+    // Memos Start
+    var memo = {
+        host: 'https://demo.usememos.com/',
+        limit: '10',
+        creatorId: '101',
+        domId: '#memos',
+        username: 'Admin',
+        name: 'Administrator'
+    }
+    if (typeof (memos) !== "undefined") {
+        for (var key in memos) {
+            if (memos[key]) {
+                memo[key] = memos[key];
+            }
+        }
+    }
 
     //load bibi
     function memoTalks() {
@@ -40,22 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //load Memos相册
     function memoAlbum(numb) {
-        // Memos Start
-        var memo = {
-            host: 'https://demo.usememos.com/',
-            limit: '10',
-            creatorId: '101',
-            domId: '#memos',
-            username: 'Admin',
-            name: 'Administrator'
-        }
-        if (typeof (memos) !== "undefined") {
-            for (var key in memos) {
-                if (memos[key]) {
-                    memo[key] = memos[key];
-                }
-            }
-        }
         var memoUrl = memo.host + "api/memo?creatorId=" + memo.creatorId + "&tag=相册";
         let limit = numb || 8;
 
@@ -85,30 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //loading
     function loadAlbum2(albumData, limit) {
-        let html = '', imgs = [];
-        let nowNum = 0;
-        albumData.forEach(item => {
-            imgs = imgs.concat(item.content.match(/\!\[.*?\]\(.*?\)/g));
-        });
-        imgs.forEach(item => {
-            if (item && nowNum < limit) {
-                nowNum++
-                let img = item.replace(/!\[.*?\]\((.*?)\)/g, '$1'),
-                    time, title, tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
-                if (tat.indexOf(' ') !== -1) {
-                    time = tat.split(' ')[0];
-                    title = tat.split(' ')[1];
-                } else title = tat
-
-                html += `<div class="memos-photo"><a href="${img}" data-fancybox="gallery" class="fancybox" data-thumb="${img}"><img class="photo-img" loading='lazy' decoding="async" src="${img}"></a>`;
-                title ? html += `<span class="photo-title">${title}</span>` : '';
-                time ? html += `<span class="photo-time">${time}</span>` : '';
-                html += `</div>`;
-            }
-        });//end of  for
-        var galleryBefore = `<div class="memos-photo-wrapper">`
-        var galleryAfter = `</div>`
-        resultAll = galleryBefore + html + galleryAfter
+        let html = leonus.procMemosGalleries(memo.host, albumData, limit, 'memos-photo');
+        const galleryBefore = `<div class="memos-photo-wrapper">`;
+        const galleryAfter = `</div>`;
+        let resultAll = galleryBefore + html + galleryAfter;
         if (albumDom) {
             albumDom.innerHTML = resultAll
         }
