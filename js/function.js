@@ -53,6 +53,7 @@ var leonus = {
             }(t.data)), saveToLocal.set("talk", t, .01)
         }))
     },
+    //解析所有memos内的图片，包括md格式的，内置资源的（上传至memos服务器的图片）
     procMemosGalleries: (memosUrl, memosData, limit, className) => {
         if (!(memosData && memosData.length > 0)) {
             return '';
@@ -72,7 +73,7 @@ var leonus = {
                     title = tat.split(' ')[1];
                 } else title = tat
 
-                html += `<div class="${className}"><a href="${img}" data-fancybox="gallery" class="fancybox" data-thumb="${img}"><img class="photo-img" loading='lazy' decoding="async" src="${img}"></a>`;
+                html += `<div class="${className}"><a href="${img}" data-fancybox="gallery" class="fancybox" data-thumb="${img}"><img alt="${tat}" class="photo-img" loading='lazy' decoding="async" src="${img}"></a>`;
                 title ? html += `<span class="photo-title">${title}</span>` : '';
                 time ? html += `<span class="photo-time">${time}</span>` : '';
                 html += `</div>`;
@@ -125,5 +126,55 @@ var leonus = {
             }
         }
         return picsUrlLikeMd.match(/\!\[.*?\]\(.*?\)/g);
+    },
+    //处理哔哔页面memos
+    procBiBi: (memosUrl, singleData, className) => {
+        var memoContREG = '';
+        //解析md图片
+        let imgMds = [];
+        imgMds = imgMds.concat(singleData.content.match(/\!\[.*?\]\(.*?\)/g));
+        if (imgMds && imgMds.length > 0) {
+            let imgUrl = '';
+            imgMds.forEach(item => {
+                if (item) {
+                    let imgSrc = item.replace(/!\[.*?\]\((.*?)\)/g, '$1');
+                    let tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
+                    imgUrl += `<div class="${className}"><a href="${imgSrc}" data-fancybox="gallery" class="fancybox" data-thumb="${imgSrc}"><img style="min-width: 100%;" alt="${tat}" loading="lazy" src="${imgSrc}"/></a></div>`;
+                }
+            });
+            if (imgUrl) {
+                memoContREG += `<div class="resource-wrapper "><div class="images-wrapper">${imgUrl}</div></div>`;
+            }
+        }
+        // 解析内置资源文件
+        if (singleData && singleData.resourceList && singleData.resourceList.length > 0) {
+            var resourceList = singleData.resourceList;
+            var imgUrl = '', resUrl = '', resImgLength = 0;
+            for (var j = 0; j < resourceList.length; j++) {
+                var resType = resourceList[j].type.slice(0, 5);
+                var resexlink = resourceList[j].externalLink;
+                var resLink = '', fileId;
+                if (resexlink) {
+                    resLink = resexlink
+                } else {
+                    fileId = resourceList[j].publicId || resourceList[j].filename
+                    resLink = memosUrl + 'o/r/' + resourceList[j].id + '/' + fileId
+                }
+                if (resType === 'image') {
+                    imgUrl += `<div class="resimg"><a href="${resLink}" data-fancybox="gallery" class="fancybox" data-thumb="${resLink}"><img style="min-width: 100%;" loading="lazy" src="${resLink}"/></a></div>`;
+                    resImgLength = resImgLength + 1
+                }
+                if (resType !== 'image') {
+                    resUrl += '<a target="_blank" rel="noreferrer" href="' + resLink + '">' + resourceList[j].filename + '</a>'
+                }
+            } //end of for
+            if (imgUrl) {
+                memoContREG += `<div class="resource-wrapper "><div class="images-wrapper">${imgUrl}</div></div>`;
+            }
+            if (resUrl) {
+                memoContREG += `<div class="resource-wrapper "><p class="datasource">${resUrl}</p></div>`;
+            }
+        }
+        return memoContREG;
     }
 };
