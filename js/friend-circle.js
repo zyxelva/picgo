@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
             var author = d.author;
             var avatar = d.avatar;
             var sn = (cnt % 10) + 1;
-            html += `<div class="col s12 m6 l4 friend-div" data-aos="zoom-in-up"><div class="card friend-card${sn}"><div class="friend-ship"><div class="title"><img src="${avatar}" alt="img" /><div><a href="${link}"><p class="friend-title">${title}</p></a><p class="friend-name">${author}</p><p>${created}</p></div></div></div></div></div>`;
+            html += `<div class="col s12 m6 l4 friend-div" data-aos="zoom-in-up"><div class="card friend-card${sn}"><div class="friend-ship"><div class="title"><img src="${avatar}" alt="img" /><div><a target="_blank" rel="noopener nofollow" href="${link}"><p class="friend-title">${title}</p></a><p class="friend-name">${author}</p><p>${created}</p></div></div></div></div></div>`;
             cnt++;
         });
         if (circlesDom) {
