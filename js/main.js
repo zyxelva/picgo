@@ -167,7 +167,7 @@ function getTagFirstList() {
 // 标签选择 end
 
 // 插入 html
-function updateHTMl(data) {
+function updateHTMl(data, type) {
     var memoResult = "", resultAll = "";
 
     // 解析 TAG 标签，添加样式
@@ -224,10 +224,16 @@ function updateHTMl(data) {
         //拼接完整，成为一个memos
         memoResult += '<li class="timeline"><div class="memos__content"><div class="memos__text"><div class="memos__userinfo"><div>' + memos.name + '</div><div><svg viewBox="0 0 24 24" aria-label="认证账号" class="memos__verify"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg></div><div class="memos__id">@' + memos.username + '</div></div><p>' + memoContREG + '</p></div><div class="memos__meta"><small class="memos__date">' + moment(data[i].createdTs * 1000).twitter() + ' • 来自「<a href="' + memos.host + 'm/' + data[i].id + '" target="_blank">鑫鑫心情</a>」</small></div></div></li>'
     }
-    var memoBefore = '<ul class="">'
+    var memoBefore = '<ul id="memosList">'
     var memoAfter = '</ul>'
     resultAll = memoBefore + memoResult + memoAfter
-    memoDom.insertAdjacentHTML('beforeend', resultAll);
+    //type=true,放在最前面；否则，默认放在最后。
+    if(type){
+        //放在已有的ul的子元素第一位
+        document.querySelector('#memosList').insertAdjacentHTML('afterbegin', memoResult);
+    } else {
+        memoDom.insertAdjacentHTML('beforeend', resultAll);
+    }
     //取消这行注释解析豆瓣电影和豆瓣阅读
     fetchDB()
     document.querySelector('button.button-load').textContent = '加载更多';
@@ -329,6 +335,7 @@ window.onload = getTotal();
 // Toggle Darkmode
 const localTheme = window.localStorage && window.localStorage.getItem("theme");
 const themeToggle = document.querySelector(".theme-toggle");
+const postToggle = document.querySelector("#toggleButton");
 
 if (localTheme) {
     document.body.classList.remove("light-theme", "dark-theme");
@@ -355,5 +362,8 @@ themeToggle.addEventListener("click", () => {
         "theme",
         document.body.classList.contains("dark-theme") ? "dark-theme" : "light-theme",
     );
+});
+postToggle.addEventListener('click',()=>{
+    $("#memoPage").toggle();
 });
 // Darkmode End
