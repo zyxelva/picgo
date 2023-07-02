@@ -569,10 +569,20 @@ blockquote {
     height: 152px;
 }
 
+.memos-editor-container {
+    padding-left: 45px;
+    padding-top: 5px;
+}
+
 @media (max-width: 683px) {
     .menu,
     .title {
         font-size: 1rem;
+    }
+
+    .memos-editor-container {
+        padding-left: 0;
+        padding-top: 5px;
     }
 
     .memos__content {
