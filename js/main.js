@@ -74,6 +74,7 @@ if (memoDom) {
     });
 }
 
+//第一页
 function getFirstList() {
     var memoUrl_first = memoUrl + "&limit=" + limit;
     fetch(memoUrl_first).then(res => res.json()).then(resdata => {
@@ -143,6 +144,7 @@ document.addEventListener('click', function (event) {
     }
 });
 
+//带上tag查询第一页
 function getTagFirstList() {
     page = 1;
     offset = 0;
@@ -162,10 +164,9 @@ function getTagFirstList() {
         offset = limit * (page - 1)
         getNextList()
     });
-}
+}// 标签选择 end
 
-// 标签选择 end
-
+//twikoo评论加载
 function updateTwikoo(data) {
     var twiID = data.map((item) => memos.host + "m/" + item.id);
     twikoo.getCommentsCount({
