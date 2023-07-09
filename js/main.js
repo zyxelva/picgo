@@ -308,7 +308,7 @@ function fetchDB() {
         }// for end
     }
 }
-s
+
 function movieShow(fetch_href, fetch_item) {
     var storage = localStorage.getItem(fetch_item);
     var data = JSON.parse(storage);
