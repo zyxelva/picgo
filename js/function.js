@@ -128,7 +128,7 @@ var leonus = {
         return picsUrlLikeMd.match(/\!\[.*?\]\(.*?\)/g);
     },
     //处理哔哔页面memos
-    procBiBi: (memosUrl, singleData, className) => {
+    procBiBi: (memosUrl, singleData, className, envId) => {
         var memoContREG = '';
         //解析md图片
         let imgMds = [];
@@ -175,6 +175,31 @@ var leonus = {
                 memoContREG += `<div class="resource-wrapper "><p class="datasource">${resUrl}</p></div>`;
             }
         }
+
+        //twikoo
+        let memosId=singleData.id;
+        memoContREG += `<div class="memos__comments"><a class="artalk-div" onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer"><i class="fas fa-comment-dots fa-fw"></i></a></div><div id="memos_${memosId}" class='twikoo-body item-content d-none'></div>`;
         return memoContREG;
+    },
+    //twikoo
+    loadTwikoo: (memosUrl, memosId, envId)=> {
+        var twikooDom = document.querySelector('#memos_'+memosId);
+        var twikooCon = "<div id='twikoo'></div>"
+        if (twikooDom.classList.contains('d-none')) {
+            document.querySelectorAll('.twikoo-body').forEach((item) => {item.classList.add('d-none');})
+            if(document.getElementById("twikoo")){
+                document.getElementById("twikoo").remove() //如果页面中已经有其他Twikoo初始化，则移除。
+            }
+            twikooDom.insertAdjacentHTML('beforeend', twikooCon);
+            twikooDom.classList.remove('d-none');
+            twikoo.init({
+                envId: envId,
+                el: '#twikoo',
+                path: memosUrl + "/m/" + memosId
+            });
+        }else{
+            twikooDom.classList.add('d-none');
+            document.getElementById("twikoo").remove()
+        }
     }
 };
