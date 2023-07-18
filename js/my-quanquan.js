@@ -58,10 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
         }
-        if (quanquanDom) {
-            quanquanDom.insertAdjacentHTML('beforeend', html);
-            window.Lately && Lately.init({target: '.forever-updated'});
-        }
-
+        quanquanDom.insertAdjacentHTML('beforeend', html);
+        window.Lately && Lately.init({target: '.forever-updated'});
     }
 })

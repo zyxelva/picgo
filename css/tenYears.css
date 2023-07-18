@@ -1,4 +1,4 @@
-#foreverblog,#quanquan {
+#foreverblog, #quanquan {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -70,7 +70,7 @@
 }
 
 @media (max-width: 549px) {
-    #foreverblog,#quanquan {
+    #foreverblog, #quanquan {
         display: block;
     }
 
