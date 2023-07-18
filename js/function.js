@@ -243,7 +243,7 @@ var leonus = {
             }
         }
         var goodsUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=好物";
-        var localalbumUpdated = localStorage.getItem("goodsUpdated") || '';
+        var localalbumUpdated = JSON.parse(localStorage.getItem("goodsUpdated")) || '';
         var localalbumData = JSON.parse(localStorage.getItem("goodsData")) || '';
         if (localalbumData) {
             leonus.loadGoods(localalbumData, limit, memo.host, goodsDom)
