@@ -93,4 +93,65 @@ document.addEventListener("DOMContentLoaded", () => {
         window.Lately && Lately.init({target: '.photo-time'});
 
     }
+
+    //memos module
+    let todoDom = document.getElementById('todolist') || '';
+    if (todoDom) {
+        memoTodo(30);
+    }
+
+    //load Memos todos
+    function memoTodo(numb) {
+        var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=清单";
+        let limit = numb || 30;
+
+        var localalbumUpdated = JSON.parse(localStorage.getItem("todoUpdatedTime")) || '';
+        var localalbumData = JSON.parse(localStorage.getItem("todoData")) || '';
+        if (localalbumData) {
+            loadTodo(localalbumData, limit)
+            console.log("memoAlbum 本地数据加载成功")
+        } else {
+            localStorage.setItem("todoUpdatedTime", "")
+        }
+        fetch(memoUrl).then(res => res.json()).then(resdata => {
+            var todoUpdatedTime = resdata[0].updatedTs
+            if (todoUpdatedTime && localalbumUpdated !== todoUpdatedTime) {
+                var todoData = resdata
+                todoDom.innerHTML = "";
+                //开始布局
+                loadTodo(todoData, limit)
+                localStorage.setItem("todoUpdatedTime", JSON.stringify(todoUpdatedTime))
+                localStorage.setItem("todoData", JSON.stringify(todoData))
+                console.log("memoAlbum 热更新完成")
+            } else {
+                console.log("memoAlbum API 数据未更新")
+            }
+        });
+    }
+
+    function loadTodo(data, limit) {
+        var url = `${memos.host}${memos.path}?creatorId=${memos.creatorId}&tag=清单`;
+        //去除```...```整个包裹内容
+        const ANTI_REFS = /```([\W\w]+)```/g;
+        let nowNum = 0;
+        data.forEach(item => {
+            if (item && nowNum < limit) {
+                // 处理数据
+                let content = item.content,
+                    title = content.match(/\[(.*?)\]/g)[0].replace(/\[(.*?)\]/, '$1');
+                // 去掉多余内容，替换清单内容
+                content = content.replace(/#.*\s/g, '')
+                    .replace(/(-\s\[\s\]\s)(.*)/g, `<li><i style="margin-right: 5px;" class="fa-regular fa-circle"></i>$2</li>`)
+                    .replace(/(-\s\[x\]\s)(.*)/g, `<li class="achieve"><i style="margin-right: 5px;" class="fa-regular fa-circle-check"></i>$2</li>`)
+                    .replace(ANTI_REFS, '');
+                // 渲染数据
+                let div = document.createElement('div');
+                div.className = 'list_item';
+                div.innerHTML = `<h3>${title}</h3><ul>${content}</ul>`;
+                todoDom.appendChild(div);
+                nowNum++;
+            }
+        });
+        waterfall('#todolist');
+    }
 });
