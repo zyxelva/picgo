@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
         creatorId: '101',
         domId: '#memos',
         username: 'Admin',
-        name: 'Administrator'
+        name: 'Administrator',
+        path: ''
     }
     if (typeof (memos) !== "undefined") {
         for (var key in memos) {
@@ -56,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //load Memos相册
     function memoAlbum(numb) {
-        var memoUrl = memo.host + "api/memo?creatorId=" + memo.creatorId + "&tag=相册";
+        var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=相册";
         let limit = numb || 8;
 
         var localalbumUpdated = localStorage.getItem("albumUpdated") || '';
@@ -68,9 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("albumUpdated", "")
         }
         fetch(memoUrl).then(res => res.json()).then(resdata => {
-            var albumUpdated = resdata.data[0].updatedTs
+            var albumUpdated = resdata[0].updatedTs
             if (albumUpdated && localalbumUpdated !== albumUpdated) {
-                var albumData = resdata.data
+                var albumData = resdata
                 albumDom.innerHTML = "";
                 //开始布局
                 loadAlbum2(albumData, limit)

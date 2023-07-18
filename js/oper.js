@@ -113,7 +113,7 @@ function uploadImage(data) {
         apiUrl = localStorage.getItem('apiUrl')
         formData.append('file', data, new_name)
         $.ajax({
-            url: apiUrl.replace(/api\/memo/, 'api/resource/blob'),
+            url: apiUrl.replace(/api\/v1\/memo/, 'api/v1/resource/blob'),
             data: formData,
             type: 'post',
             cache: false,
@@ -122,10 +122,10 @@ function uploadImage(data) {
             dataType: 'json',
 
             success: function (result) {
-                //console.log(result)
-                if (result.data.id) {
+                console.log(result)
+                if (result.id) {
                     //获取到图片
-                    relistNow.push(result.data.id)
+                    relistNow.push(result.id)
                     localStorage.setItem("resourceIdList", JSON.stringify(relistNow));
                     $.message({
                         message: '上传成功'
@@ -156,16 +156,16 @@ $('#saveKey').click(function () {
 })
 
 $('#opensite').click(function () {
-    window.location.href = apiUrl.replace(/api\/memo.*/, '');
+    window.location.href = apiUrl.replace(/api\/v1\/memo.*/, '');
 })
 
 function getOne(memosId) {
     if (localStorage.getItem('apiUrl')) {
         apiUrl = localStorage.getItem('apiUrl')
         $("#randomlist").html('').hide()
-        var getUrl = apiUrl.replace(/api\/memo(.*)/, 'api/memo/' + memosId + '$1')
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path +'/' + memosId + '$1')
         $.get(getUrl, function (data) {
-            updateHTMl([data.data], true)
+            updateHTMl([data], true)
         });
     } else {
         $.message({
@@ -177,10 +177,10 @@ function getOne(memosId) {
 $('#tags1').click(function () {
     if (localStorage.getItem('apiUrl')) {
         apiUrl = localStorage.getItem('apiUrl')
-        var tagUrl = apiUrl.replace(/api\/memo/, 'api/tag')
+        var tagUrl = apiUrl.replace(/api\/v1\/memo/, 'api/v1/tag')
         var tagDom = ""
         $.get(tagUrl, function (data, status) {
-            var arrData = data.data
+            var arrData = data
             $.each(arrData, function (i, obj) {
                 tagDom += '<span class="item-container">#' + obj + '</span>'
             });
@@ -220,7 +220,7 @@ $('#search').click(function () {
         if (pattern) {
             $.get(apiUrl, function (data) {
                 const options = {keys: ['content']};
-                const fuse = new Fuse(data.data, options);
+                const fuse = new Fuse(data, options);
                 var searchData = fuse.search(pattern)
                 for (var i = 0; i < searchData.length; i++) {
                     searchDom += '<div class="random-item"><div class="random-time"><span id="random-link" data-id="' + searchData[i].item.id + '"><svg class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path d="M864 640a32 32 0 0 1 64 0v224.096A63.936 63.936 0 0 1 864.096 928H159.904A63.936 63.936 0 0 1 96 864.096V159.904C96 124.608 124.64 96 159.904 96H384a32 32 0 0 1 0 64H192.064A31.904 31.904 0 0 0 160 192.064v639.872A31.904 31.904 0 0 0 192.064 864h639.872A31.904 31.904 0 0 0 864 831.936V640zm-485.184 52.48a31.84 31.84 0 0 1-45.12-.128 31.808 31.808 0 0 1-.128-45.12L815.04 166.048l-176.128.736a31.392 31.392 0 0 1-31.584-31.744 32.32 32.32 0 0 1 31.84-32l255.232-1.056a31.36 31.36 0 0 1 31.584 31.584L924.928 388.8a32.32 32.32 0 0 1-32 31.84 31.392 31.392 0 0 1-31.712-31.584l.736-179.392L378.816 692.48z" fill="#666" data-spm-anchor-id="a313x.7781069.0.i12" class="selected"/></svg></span><span id="random-delete" data-id="' + searchData[i].item.id + '"><svg class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="32" height="32"><path d="M224 322.6h576c16.6 0 30-13.4 30-30s-13.4-30-30-30H224c-16.6 0-30 13.4-30 30 0 16.5 13.5 30 30 30zm66.1-144.2h443.8c16.6 0 30-13.4 30-30s-13.4-30-30-30H290.1c-16.6 0-30 13.4-30 30s13.4 30 30 30zm339.5 435.5H394.4c-16.6 0-30 13.4-30 30s13.4 30 30 30h235.2c16.6 0 30-13.4 30-30s-13.4-30-30-30z" fill="#666"/><path d="M850.3 403.9H173.7c-33 0-60 27-60 60v360c0 33 27 60 60 60h676.6c33 0 60-27 60-60v-360c0-33-27-60-60-60zm-.1 419.8l-.1.1H173.9l-.1-.1V464l.1-.1h676.2l.1.1v359.7z" fill="#666"/></svg></span>' + dayjs(new Date(searchData[i].item.createdTs) * 1000).fromNow() + '</div><div class="random-content">' + searchData[i].item.content.replace(/!\[.*?\]\((.*?)\)/g, ' <img class="random-image" src="$1"/> ').replace(/\[(.*?)\]\((.*?)\)/g, ' <a href="$2" target="_blank">$1</a> ') + '</div>'
@@ -233,7 +233,7 @@ $('#search').click(function () {
                             if (resexlink) {
                                 resLink = resexlink
                             } else {
-                                resLink = apiUrl.replace(/api\/memo.*/, '') + 'o/r/' + resourceList[j].id + '/' + resourceList[j].filename
+                                resLink = apiUrl.replace(/api\/v1\/memo.*/, '') + 'o/r/' + resourceList[j].id + '/' + resourceList[j].filename
                             }
                             if (restype == 'image') {
                                 searchDom += '<img class="random-image" src="' + resLink + '"/>'
@@ -268,21 +268,21 @@ $('#random').click(function () {
         if ($("#taglist").is(':visible') && nowTag) {
             var tagUrl = apiUrl + '&rowStatus=NORMAL&tag=' + nowTag
             $.get(tagUrl, function (data) {
-                let randomNum = Math.floor(Math.random() * (data.data.length));
-                var randomData = data.data[randomNum]
+                let randomNum = Math.floor(Math.random() * (data.length));
+                var randomData = data[randomNum]
                 randDom(randomData)
             })
         } else {
             var randomUrl0 = apiUrl + '&rowStatus=NORMAL&limit=1'
             $.get(randomUrl0, function (data) {
-                var creatorId = data.data[0].creatorId
-                var randomUrl1 = apiUrl.replace(/api\/memo.*/, 'api/memo/stats?creatorId=') + creatorId
+                var creatorId = data[0].creatorId
+                var randomUrl1 = apiUrl.replace(/api\/v1\/memo.*/, memos.path + '/stats?creatorId=') + creatorId
                 $.get(randomUrl1, function (data) {
-                    console.log(data.data.length)
-                    let randomNum = Math.floor(Math.random() * (data.data.length)) + 1;
+                    console.log(data.length)
+                    let randomNum = Math.floor(Math.random() * (data.length)) + 1;
                     var randomUrl2 = apiUrl + '&rowStatus=NORMAL&limit=1&offset=' + randomNum
                     $.get(randomUrl2, function (data) {
-                        var randomData = data.data[0]
+                        var randomData = data[0]
                         randDom(randomData)
                     });
                 });
@@ -307,7 +307,7 @@ function randDom(randomData) {
             if (resexlink) {
                 resLink = resexlink
             } else {
-                resLink = apiUrl.replace(/api\/memo.*/, '') + 'o/r/' + resourceList[j].id + '/' + resourceList[j].filename
+                resLink = apiUrl.replace(/api\/v1\/memo.*/, '') + 'o/r/' + resourceList[j].id + '/' + resourceList[j].filename
             }
             if (restype == 'image') {
                 randomDom += '<img class="random-image" src="' + resLink + '"/>'
@@ -323,12 +323,12 @@ function randDom(randomData) {
 }
 
 $(document).on("click", "#random-link", function () {
-    window.location.href = apiUrl.replace(/api\/memo.*/, '') + "m/" + this.getAttribute('data-id');
+    window.location.href = apiUrl.replace(/api\/v1\/memo.*/, '') + "m/" + this.getAttribute('data-id');
 })
 
 $(document).on("click", "#random-delete", function () {
     var memosId = this.getAttribute('data-id');
-    var deleteUrl = apiUrl.replace(/api\/memo(.*)/, 'api/memo/' + memosId + '$1')
+    var deleteUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1')
     $.ajax({
         url: deleteUrl,
         type: "PATCH",
@@ -456,7 +456,7 @@ function sendText() {
             dataType: "json",
             success: function (result) {
                 //发送成功
-                getOne(result.data.id)
+                getOne(result.id)
                 localStorage.removeItem("resourceIdList");
                 localStorage.removeItem("contentNow");
                 $.message({

@@ -47,7 +47,7 @@
 // Lazyload End
 
 var limit = memos.limit
-var memoUrl = memos.host + "api/memo?creatorId=" + memos.creatorId + "&rowStatus=NORMAL"
+var memoUrl = memos.host + memos.path + "?creatorId=" + memos.creatorId + "&rowStatus=NORMAL"
 var page = 1,
     offset = 0,
     nextLength = 0,
@@ -74,12 +74,11 @@ if (memoDom) {
     });
 }
 
-//第一页
 function getFirstList() {
     var memoUrl_first = memoUrl + "&limit=" + limit;
     fetch(memoUrl_first).then(res => res.json()).then(resdata => {
-        updateTwikoo(resdata.data)
-        var nowLength = resdata.data.length
+        updateTwikoo(resdata)
+        var nowLength = resdata.length
         if (nowLength < limit) { // 返回数据条数小于 limit 则直接移除“加载更多”按钮，中断预加载
             document.querySelector("button.button-load").remove()
             btnRemove = 1
@@ -99,7 +98,7 @@ function getNextList() {
         var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset;
     }
     fetch(memoUrl_next).then(res => res.json()).then(resdata => {
-        nextDom = resdata.data
+        nextDom = resdata
         nextLength = nextDom.length
         page++
         offset = limit * (page - 1)
@@ -144,7 +143,6 @@ document.addEventListener('click', function (event) {
     }
 });
 
-//带上tag查询第一页
 function getTagFirstList() {
     page = 1;
     offset = 0;
@@ -153,8 +151,8 @@ function getTagFirstList() {
     memoDom.innerHTML = "";
     var memoUrl_tag = memoUrl + "&limit=" + limit + "&tag=" + tag;
     fetch(memoUrl_tag).then(res => res.json()).then(resdata => {
-        updateTwikoo(resdata.data);
-        var nowLength = resdata.data.length
+        updateTwikoo(resdata);
+        var nowLength = resdata.length
         if (nowLength < limit) { // 返回数据条数小于 limit 则直接移除“加载更多”按钮，中断预加载
             document.querySelector("button.button-load").remove()
             btnRemove = 1
@@ -164,9 +162,10 @@ function getTagFirstList() {
         offset = limit * (page - 1)
         getNextList()
     });
-}// 标签选择 end
+}
 
-//twikoo评论加载
+// 标签选择 end
+
 function updateTwikoo(data) {
     var twiID = data.map((item) => memos.host + "m/" + item.id);
     twikoo.getCommentsCount({
@@ -193,10 +192,8 @@ function updateTwikoo(data) {
 // 插入 html
 function updateHTMl(data, type) {
     var memoResult = "", resultAll = "";
-
     // 解析 TAG 标签，添加样式
-    const TAG_REG = /#([^\s#]+?) /g;
-
+    const TAG_REG = /#([^\s#]+?)\s/g;
     // 解析 BiliBili
     const BILIBILI_REG = /<a\shref="https:\/\/www\.bilibili\.com\/video\/((av[\d]{1,10})|(BV([\w]{10})))\/?">.*<\/a>/g;
     // 解析网易云音乐
@@ -211,6 +208,14 @@ function updateHTMl(data, type) {
     const YOUKU_REG = /<a\shref="https:\/\/v\.youku\.com\/.*\/id_([a-z|A-Z|0-9|==]+)\.html".*?>.*<\/a>/g;
     //解析 Youtube
     const YOUTUBE_REG = /<a\shref="https:\/\/www\.youtube\.com\/watch\?v\=([a-z|A-Z|0-9]{11})\".*?>.*<\/a>/g;
+    //去除markdown图片
+    const MARKDOWN_PICS = /\!\[.*?\]\(.*?\)/g;
+    //去除```...```整个包裹内容
+    const ANTI_REFS = /```([\W\w]+)```/g;
+    //去除<pre>
+    const HTML_PRE=/\<pre\>[\W\w]+\<\/pre\>/g;
+    //内置图片，被markedjs解析的，干掉
+    const MARKED_JS_PICS=/\<div class\=\"waterfall\" id\=\"encrypt\-blog\"\>.*\<\/div\>/g;
 
     // Marked Options
     marked.setOptions({
@@ -224,16 +229,20 @@ function updateHTMl(data, type) {
     });
 
     // Memos Content
+    var isGallery=false;
     for (var i = 0; i < data.length; i++) {
         var memoContREG = data[i].content
             .replace(TAG_REG, "<span class='tag-span'><a rel='noopener noreferrer' href='#$1'>#$1</a></span>")
+
+        if (memoContREG.indexOf('#相册') > 0) {
+            isGallery = true;
+        }
         // For CJK language users
         // 用 PanguJS 自动处理中英文混合排版
         // 在 index.html 引入 JS：<script type="text/javascript" src="assets/js/pangu.min.js?v=4.0.7"></script>
         // 把下面的 memoContREG = marked.parse(memoContREG) 改为：memoContREG = marked.parse(pangu.spacing(memoContREG))
         //如果用这个的话，会把【#说说】这种tag修改为【# 说说】，对于memos通过tag去过滤查询会有影响。
         // 若仍然想使用pangu，可在136行末尾，加上【.trim()】，去除前后空格可解决。
-
         memoContREG = marked.parse(pangu.spacing(memoContREG))
             .replace(BILIBILI_REG, "<div class='video-wrapper'><iframe src='//player.bilibili.com/player.html?bvid=$1&as_wide=1&high_quality=1&danmaku=0' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' style='position:absolute;height:100%;width:100%;'></iframe></div>")
             .replace(YOUTUBE_REG, "<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/$1' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>")
@@ -243,10 +252,23 @@ function updateHTMl(data, type) {
             .replace(SPOTIFY_REG, "<div class='spotify-wrapper'><iframe style='border-radius:12px' src='https://open.spotify.com/embed/$1/$2?utm_source=generator&theme=0' width='100%' frameBorder='0' allowfullscreen='' allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' loading='lazy'></iframe></div>")
             .replace(YOUKU_REG, "<div class='video-wrapper'><iframe src='https://player.youku.com/embed/$1' frameborder=0 'allowfullscreen'></iframe></div>")
             .replace(YOUTUBE_REG, "<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/$1' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>")
-        //处理图片等
+
         memoContREG += leonus.procBiBi(memos.host, data[i], 'resimg', envId);
+        //去除md图片、反引用内容
+        if (isGallery) {
+            memoContREG = memoContREG.replace(MARKDOWN_PICS, '').replace(ANTI_REFS, '').replace(HTML_PRE, '');
+            isGallery = false;
+        }
+        //删除markedjs解析的memos内置图片
+        memoContREG = memoContREG.replace(MARKED_JS_PICS, '');
+        //置顶
+        var pinnedFlag=data[i].pinned;
+        let pinnedHtml='';
+        if (pinnedFlag){
+            pinnedHtml += `<div title="置顶"><svg class="memos__verify" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#icon-a744ea7b4e0022c)"><path d="M10.6963 17.5042C13.3347 14.8657 16.4701 14.9387 19.8781 16.8076L32.62 9.74509L31.8989 4.78683L43.2126 16.1005L38.2656 15.3907L31.1918 28.1214C32.9752 31.7589 33.1337 34.6647 30.4953 37.3032C30.4953 37.3032 26.235 33.0429 22.7171 29.525L6.44305 41.5564L18.4382 25.2461C14.9202 21.7281 10.6963 17.5042 10.6963 17.5042Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/></g><defs><clipPath id="icon-a744ea7b4e0022c"><rect width="48" height="48" fill="#333"/></clipPath></defs></svg></div>`;
+        }
         //拼接完整，成为一个memos
-        memoResult += '<li class="timeline"><div class="memos__content"><div class="memos__text"><div class="memos__userinfo"><div>' + memos.name + '</div><div><svg viewBox="0 0 24 24" aria-label="认证账号" class="memos__verify"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg></div><div class="memos__id">@' + memos.username + '</div></div><p>' + memoContREG + '</p></div><div class="memos__meta"><small class="memos__date">' + moment(data[i].createdTs * 1000).twitter() + ' • 来自「<a href="' + memos.host + 'm/' + data[i].id + '" target="_blank">鑫鑫心情</a>」</small></div></div></li>'
+        memoResult += '<li class="timeline"><div class="memos__content"><div class="memos__text"><div class="memos__userinfo"><div>' + memos.name + '</div><div class="memos__svg"><div title="认证账号"><svg viewBox="0 0 24 24" class="memos__verify"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg></div>' +pinnedHtml + '</div><div class="memos__id">@' + memos.username + '</div></div><p>' + memoContREG + '</p></div><div class="memos__meta"><small class="memos__date">' + moment(data[i].createdTs * 1000).twitter() + ' • 来自「<a href="' + memos.host + 'm/' + data[i].id + '" target="_blank">鑫鑫心情</a>」</small></div></div></li>'
     }
     var memoBefore = '<ul id="memosList">'
     var memoAfter = '</ul>'
@@ -258,8 +280,8 @@ function updateHTMl(data, type) {
     } else {
         memoDom.insertAdjacentHTML('beforeend', resultAll);
     }
-    //取消这行注释解析豆瓣电影和豆瓣阅读
-    fetchDB()
+    //解析豆瓣电影和豆瓣阅读
+    // leonus.fetchNeoDB()
     document.querySelector('button.button-load').textContent = '加载更多';
 }
 
@@ -342,10 +364,10 @@ window.ViewImage && ViewImage.init('.container img');
 // Memos Total Start
 // Get Memos total count
 function getTotal() {
-    var totalUrl = memos.host + "api/memo/stats?creatorId=" + memos.creatorId
+    var totalUrl = memos.host + memos.path + "/stats?creatorId=" + memos.creatorId
     fetch(totalUrl).then(res => res.json()).then(resdata => {
-        if (resdata.data) {
-            var allnums = resdata.data.length
+        if (resdata) {
+            var allnums = resdata.length
             var memosCount = document.getElementById('total');
             memosCount.innerHTML = allnums;
         }

@@ -9,7 +9,8 @@ function whenDOMReady() {
         creatorId: '101',
         domId: '#memos',
         username: 'Admin',
-        name: 'Administrator'
+        name: 'Administrator',
+        path: ''
     }
     if (typeof (memos) !== "undefined") {
         for (var key in memos) {
@@ -19,7 +20,7 @@ function whenDOMReady() {
         }
     }
     host = memo.host;
-    var memoUrl = memo.host + "api/memo?creatorId=" + memo.creatorId + "&tag=相册"
+    var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=相册"
     if (location.pathname === '/photos/') {
         photos(memoUrl);
     }
@@ -48,9 +49,9 @@ function photos(memoUrl) {
     }
 
     fetch(memoUrl).then(res => res.json()).then(resdata => {
-        var memosPicsUpdated = resdata.data[0].updatedTs
+        var memosPicsUpdated = resdata[0].updatedTs
         if (memosPicsUpdated && localAlbumUpdated != memosPicsUpdated) {
-            var memosPicsData = resdata.data
+            var memosPicsData = resdata
             //开始布局
             loadAlbum2(memosPicsData, limit)
             localStorage.setItem("memosPicsUpdated", JSON.stringify(memosPicsUpdated))

@@ -139,7 +139,7 @@ var leonus = {
                 if (item) {
                     let imgSrc = item.replace(/!\[.*?\]\((.*?)\)/g, '$1');
                     let tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
-                    imgUrl += `<div class="${className}"><a href="${imgSrc}" data-fancybox="gallery" class="fancybox" data-thumb="${imgSrc}"><img style="min-width: 100%;" alt="${tat}" loading="lazy" src="${imgSrc}"/></a></div>`;
+                    imgUrl += `<div class="${className}"><a href="${imgSrc}" data-fancybox="gallery" class="fancybox" data-thumb="${imgSrc}"><img alt="${tat}" loading="lazy" src="${imgSrc}"/></a></div>`;
                 }
             });
             if (imgUrl) {
@@ -161,7 +161,7 @@ var leonus = {
                     resLink = memosUrl + 'o/r/' + resourceList[j].id + '/' + fileId
                 }
                 if (resType === 'image') {
-                    imgUrl += `<div class="resimg"><a href="${resLink}" data-fancybox="gallery" class="fancybox" data-thumb="${resLink}"><img style="min-width: 100%;" loading="lazy" src="${resLink}"/></a></div>`;
+                    imgUrl += `<div class="resimg"><a href="${resLink}" data-fancybox="gallery" class="fancybox" data-thumb="${resLink}"><img loading="lazy" src="${resLink}"/></a></div>`;
                     resImgLength = resImgLength + 1
                 }
                 if (resType !== 'image') {
@@ -201,5 +201,111 @@ var leonus = {
             twikooDom.classList.add('d-none');
             document.getElementById("twikoo").remove()
         }
+    },
+    //time formation
+    formatTimestamp: (value) => {
+        if (value) {
+            let date = new Date(value * 1000);    // 时间戳为秒：10位数
+            //let date = new Date(value); // 时间戳为毫秒：13位数
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+            let day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+            let hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
+            let minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+            let second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
+            if (new Date().getFullYear() === year) {
+                return `${month}-${day} ${hour}:${minute}:${second}`;
+            } else {
+                return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+            }
+        } else {
+            return ''
+        }
+    },
+    //好物
+    memoGoods: (numb, goodsDom) => {
+        let limit = numb || 30;
+        // Memos Start
+        var memo = {
+            host: 'https://demo.usememos.com/',
+            limit: '10',
+            creatorId: '101',
+            domId: '#memos',
+            username: 'Admin',
+            name: 'Administrator',
+            path: ''
+        }
+        if (typeof (memos) !== "undefined") {
+            for (var key in memos) {
+                if (memos[key]) {
+                    memo[key] = memos[key];
+                }
+            }
+        }
+        var goodsUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=好物";
+        var localalbumUpdated = localStorage.getItem("goodsUpdated") || '';
+        var localalbumData = JSON.parse(localStorage.getItem("goodsData")) || '';
+        if (localalbumData) {
+            leonus.loadGoods(localalbumData, limit, memo.host, goodsDom)
+            console.log("memosGoods 本地数据加载成功")
+        } else {
+            localStorage.setItem("goodsUpdated", "")
+        }
+        fetch(goodsUrl).then(res => res.json()).then(resdata => {
+            var goodsUpdated = resdata[0].updatedTs
+            if (goodsUpdated && localalbumUpdated !== goodsUpdated) {
+                var goodsData = resdata
+                //开始布局
+                leonus.loadGoods(goodsData, limit, memo.host, goodsDom)
+                localStorage.setItem("goodsUpdated", JSON.stringify(goodsUpdated))
+                localStorage.setItem("goodsData", JSON.stringify(goodsData))
+                console.log("memosGoods 热更新完成")
+            } else {
+                console.log("memosGoods API 数据未更新")
+            }
+        });
+    },
+    loadGoods: (data, limit, memosUrl, goodsDom) => {
+        let nowNum = 1;
+        const regex = /\n/;
+        // 格式：#好物 \n价格\n标题（可链接）\n描述
+        var result = '', resultAll = "";
+        for (var i = 0; i < data.length && i < limit; i++) {
+            if (nowNum <= limit) {
+                var goodsCont = data[i].content.replace("#好物 \n", '')
+                var goodsConts = goodsCont.split(regex)
+                //解析memos内置资源文件(我一般不用memos上传图片，节省空间，用CDN或外链接)
+                if (data[i].resourceList && data[i].resourceList.length > 0) {
+                    var resourceList = data[i].resourceList;
+                    for (var j = 0; j < resourceList.length; j++) {
+                        var restype = resourceList[j].type.slice(0, 5);
+                        var resexlink = resourceList[j].externalLink
+                        var resLink = '', fileId = ''
+                        if (resexlink) {
+                            resLink = resexlink
+                        } else {
+                            fileId = resourceList[j].publicId || resourceList[j].filename
+                            resLink = memosUrl + 'o/r/' + resourceList[j].id + '/' + fileId
+                        }
+                        if (restype === 'image' && nowNum <= limit) {
+                            result += '<div class="goods-bankuai img-hide"><div class="goods-duiqi memos-photo"><a href="${resLink}" data-fancybox="gallery" class="fancybox" data-thumb="${resLink}"><img loading="lazy" decoding="async" src="' + resLink + '"/></a></div><div class="goods-jiage">' + goodsConts[0] + '</div><div class="goods-title">' + goodsConts[1].replace(/\[(.*?)\]\((.*?)\)/g, ' <a href="$2" target="_blank">$1</a> ') + '</div><div class="goods-note">' + goodsConts[2] + '</div></div>'
+                            nowNum++;
+                        }
+                    }
+                }
+                //解析markdown格式图片
+                var product = goodsConts[1].replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+                var img = goodsConts[1].replace(/\[(.*?)\]\((.*?)\)/g, '$2');
+                var price = goodsConts[0];
+                var note = goodsConts[2];
+                result += `<div class="goods-bankuai img-hide"><div class="goods-duiqi  memos-photo"><a href="${img}" data-fancybox="gallery" class="fancybox" data-thumb="${img}"><img class="photo-img" loading="lazy" decoding="async" src="${img}" /></a></div><div class="goods-jiage">${price}</div><div class="goods-title"><a href="${img}" target="_blank">${product}</a></div><div class="goods-note">${note}</div></div>`;
+                nowNum++;
+            }
+        }
+        var goodsBefore = ``
+        var goodsAfter = ``
+        resultAll = result
+        goodsDom.innerHTML = resultAll
+
     }
 };
