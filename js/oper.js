@@ -451,6 +451,7 @@ function sendText() {
         var showTag = localStorage.getItem('showtag') || ''
         var nowTag = $("textarea[name=text]").val().match(/(#[^\s#]+)/)
         var sendvisi = localStorage.getItem('memoLock') || ''
+        var relationList = JSON.parse(localStorage.getItem('relationList')) || [];
         if (nowTag) {
             if (nowTag[1] == showTag) {
                 sendvisi = 'PUBLIC'
@@ -465,6 +466,7 @@ function sendText() {
                 'content': content,
                 'visibility': sendvisi,
                 'resourceIdList': JSON.parse(localStorage.getItem("resourceIdList")) || [],
+                'relationList': relationList
             }),
             contentType: "application/json;",
             dataType: "json",
@@ -473,6 +475,7 @@ function sendText() {
                 getOne(result.id)
                 localStorage.removeItem("resourceIdList");
                 localStorage.removeItem("contentNow");
+                localStorage.removeItem('relationList');
                 $.message({
                     message: '发送成功！😊'
                 })

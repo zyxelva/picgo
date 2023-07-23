@@ -326,6 +326,7 @@ var leonus = {
         }
         //转发内容实体
         let memosForm = {
+            id: data.id,
             creatorName: data.creatorName,
             content: transData,
             url: memosUrl + 'm/' + data.id
@@ -337,6 +338,8 @@ var leonus = {
         if (!leonus.openMemosEditForm()) {
             return;
         }
+        //引用内容关联
+        localStorage.setItem('relationList', JSON.stringify([{"relatedMemoId": a.id, "type": "REFERENCE"}]));
         const memosTextarea = document.querySelector(".common-editor-inputer");
         memosTextarea.value = '[@' + a.creatorName + '](' + a.url + ') \n\n> ' + a.creatorName + ': ' + a.content;
         memosTextarea.style.height = memosTextarea.scrollHeight + 'px';
@@ -358,14 +361,13 @@ var leonus = {
         }
     },
     openMemosEditForm: function () {
-        var isHide = window.localStorage && window.localStorage.getItem("memos-editor-display");
         //打开编辑框
-        if (isHide && JSON.parse(isHide)) {
-            var editFormDom = document.querySelector('#memoPage');
-            if (editFormDom.classList.contains('d-none')) {
-                editFormDom.classList.remove('d-none');
-            }
+        var editFormDom = document.querySelector('#memoPage');
+        if (editFormDom.classList.contains('d-none')) {
+            editFormDom.classList.remove('d-none');
+            localStorage.setItem("memos-editor-display", true);
         }
+
         var memosOpenId = window.localStorage && window.localStorage.getItem("memos-access-token");
         if (!memosOpenId) {
             $.message({
