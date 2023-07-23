@@ -357,8 +357,8 @@ var leonus = {
                             <i class="fa-regular fa-pen-to-square"></i>
                         </a>`;
             }
-            return editBtn;
         }
+        return editBtn;
     },
     openMemosEditForm: function () {
         //打开编辑框
