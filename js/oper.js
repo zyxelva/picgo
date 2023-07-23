@@ -5,6 +5,8 @@ var hidetag = localStorage.getItem('hidetag') || ''
 var showtag = localStorage.getItem('showtag') || ''
 $('#hideInput').val(hidetag)
 $('#showInput').val(showtag)
+const apiReg = /openId=([^&]*)/;
+const urlReg = /(.+?)(?:\/api)/;
 
 if (apiUrl == '') {
     $('#blog_info').show()
@@ -109,7 +111,7 @@ function uploadImage(data) {
         let file_ext = data.name.split('.').pop();
         let now = dayjs().format('YYYYMMDDHHmm')
         let new_name = old_name[0] + '_' + now + '.' + file_ext;
-
+        let localResourceIdList = [];
         apiUrl = localStorage.getItem('apiUrl')
         formData.append('file', data, new_name)
         $.ajax({
@@ -124,9 +126,16 @@ function uploadImage(data) {
             success: function (result) {
                 console.log(result)
                 if (result.id) {
+                    let imageList = "";
+                    imageList += '<div data-id="' + result.id + '" class="memos-tag d-flex" onclick="deleteImage(this)"><div class="d-flex px-2 justify-content-center">' + result.filename + '</div></div>'
+                    document.querySelector(".memos-image-list").insertAdjacentHTML('afterbegin', imageList);
                     //获取到图片
-                    relistNow.push(result.id)
-                    localStorage.setItem("resourceIdList", JSON.stringify(relistNow));
+                    //这里判断下是否已存在资源列表（编辑时会有）
+                    if (JSON.parse(localStorage.getItem("resourceIdList"))) {
+                        localResourceIdList = JSON.parse(localStorage.getItem("resourceIdList"));
+                    }
+                    localResourceIdList.push(result.id);
+                    localStorage.setItem("resourceIdList", JSON.stringify(localResourceIdList));
                     $.message({
                         message: '上传成功'
                     })
@@ -148,7 +157,12 @@ function uploadImage(data) {
 
 $('#saveKey').click(function () {
     // 保存数据
-    localStorage.setItem("apiUrl", $('#apiUrl').val());
+    let memosApi = $('#apiUrl').val();
+    let memosOpenId = memosApi.match(apiReg)[1];
+    let urlRes = memosApi.match(urlReg)[1];
+    localStorage.setItem("apiUrl", memosApi);
+    localStorage.setItem("memos-access-path", urlRes);
+    localStorage.setItem("memos-access-token", memosOpenId);
     $.message({
         message: '保存信息成功'
     })
@@ -163,7 +177,7 @@ function getOne(memosId) {
     if (localStorage.getItem('apiUrl')) {
         apiUrl = localStorage.getItem('apiUrl')
         $("#randomlist").html('').hide()
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path +'/' + memosId + '$1')
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1')
         $.get(getUrl, function (data) {
             updateHTMl([data], true)
         });
@@ -475,4 +489,4 @@ function sendText() {
             message: '请先填写好 API 链接'
         })
     }
-}  
+}

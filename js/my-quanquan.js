@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         var localCirclesData = JSON.parse(localStorage.getItem("friendCircleData")) || '';
         if (localCirclesData) {
             loadFriendsCircles(localCirclesData, fetchNum)
-            console.log("friendCircle 本地数据加载成功")
+            console.log("myQuanquan 本地数据加载成功")
         } else {
             localStorage.setItem("friendCircleUpdated", "")
         }
@@ -34,9 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadFriendsCircles(friendCircleData, fetchNum)
                 localStorage.setItem("friendCircleUpdated", friendCircleUpdated)
                 localStorage.setItem("friendCircleData", JSON.stringify(friendCircleData))
-                console.log("friendCircle 热更新完成")
+                console.log("myQuanquan 热更新完成")
             } else {
-                console.log("friendCircle API 数据未更新")
+                console.log("myQuanquan API 数据未更新")
             }
         });//end of fetch
     }

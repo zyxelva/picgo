@@ -1,4 +1,10 @@
 "use strict";
+//正则
+const IMG_REG = /\!\[(.*?)\]\((.*?)\)/g,
+    LINK_REG = /(?<!!)\[(.*?)\]\((.*?)\)/g,
+    LINE_REG = /\n/g,
+    BLOCK_QUOTE_REG = /\>.*$/g,
+    CODE_REG = /\```.*$/g;
 var leonus = {
     cp: () => {
         document.body.addEventListener("copy", (e => {
@@ -82,19 +88,6 @@ var leonus = {
         return html;
     },
     //最终需要酱紫：![xxx](url)
-    //demo: [{
-    //           "id": 13,
-    //           "creatorId": 1,
-    //           "createdTs": 1687395117,
-    //           "updatedTs": 1687395117,
-    //           "filename": "1687395079_F7A1CD62-8CD8-4D15-AD9B-F249F6A42503.jpg",
-    //           "internalPath": "/var/opt/memos/assets/1687395079_F7A1CD62-8CD8-4D15-AD9B-F249F6A42503.jpg",
-    //           "externalLink": "",
-    //           "type": "image/jpeg",
-    //           "size": 523150,
-    //           "publicId": "8d5b0eeb-804a-4533-b677-5a67febaaae9",
-    //           "linkedMemoAmount": 1
-    //         }]
     procMemosResources: (memosUrl, item) => {
         if (!(item && item.resourceList && 0 < item.resourceList.length) || !memosUrl) {
             return '';
@@ -127,7 +120,14 @@ var leonus = {
         }
         return picsUrlLikeMd.match(/\!\[.*?\]\(.*?\)/g);
     },
-    //处理哔哔页面memos
+    /**
+     * 处理哔哔页面memos
+     * @param memosUrl memos domain
+     * @param singleData single memos data
+     * @param className dom
+     * @param envId twikoo envId
+     * @returns {string}
+     */
     procBiBi: (memosUrl, singleData, className, envId) => {
         var memoContREG = '';
         //解析md图片
@@ -176,18 +176,22 @@ var leonus = {
             }
         }
 
-        //twikoo
-        let memosId=singleData.id;
-        memoContREG += `<div class="memos__comments"><a class="artalk-div" onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer"><i class="fas fa-comment-dots fa-fw"></i></a></div><div id="memos_${memosId}" class='twikoo-body item-content d-none'></div>`;
+        //twikoo + forward + edit
+        let memosId = singleData.id;
+        let memosForm = leonus.getMemosForm(memosUrl, singleData);
+        let editBtn = leonus.getEditBtn(memosUrl, memosId);
+        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer"><i class="fa-solid fa-share-from-square"></i></a>${editBtn}</div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
         return memoContREG;
     },
     //twikoo
-    loadTwikoo: (memosUrl, memosId, envId)=> {
-        var twikooDom = document.querySelector('#memos_'+memosId);
+    loadTwikoo: (memosUrl, memosId, envId) => {
+        var twikooDom = document.querySelector('#memos_' + memosId);
         var twikooCon = "<div id='twikoo'></div>"
         if (twikooDom.classList.contains('d-none')) {
-            document.querySelectorAll('.twikoo-body').forEach((item) => {item.classList.add('d-none');})
-            if(document.getElementById("twikoo")){
+            document.querySelectorAll('.twikoo-body').forEach((item) => {
+                item.classList.add('d-none');
+            })
+            if (document.getElementById("twikoo")) {
                 document.getElementById("twikoo").remove() //如果页面中已经有其他Twikoo初始化，则移除。
             }
             twikooDom.insertAdjacentHTML('beforeend', twikooCon);
@@ -197,7 +201,7 @@ var leonus = {
                 el: '#twikoo',
                 path: memosUrl + "/m/" + memosId
             });
-        }else{
+        } else {
             twikooDom.classList.add('d-none');
             document.getElementById("twikoo").remove()
         }
@@ -265,6 +269,7 @@ var leonus = {
             }
         });
     },
+    //渲染好物
     loadGoods: (data, limit, memosUrl, goodsDom) => {
         let nowNum = 1;
         const regex = /\n/;
@@ -307,5 +312,182 @@ var leonus = {
         resultAll = result
         goodsDom.innerHTML = resultAll
 
+    },
+    /**
+     * 获取转发内容
+     * @param memosUrl memos 域名
+     * @param data 转发的元数据
+     * @returns {string}
+     */
+    getMemosForm: (memosUrl, data) => {
+        let transData = data.content.replace(TAG_REG, "").replace(IMG_REG, "").replace(LINK_REG, "$1").replace(LINE_REG, " ").replace(BLOCK_QUOTE_REG, "").replace(CODE_REG, "");
+        if (transData.length > 140) {
+            transData = transData.substring(0, 140) + '...'
+        }
+        //转发内容实体
+        let memosForm = {
+            creatorName: data.creatorName,
+            content: transData,
+            url: memosUrl + 'm/' + data.id
+        };
+        return JSON.stringify(memosForm).replace(/"/g, '&quot;');
+    },
+    //转发
+    transPond: (a) => {
+        if (!leonus.openMemosEditForm()) {
+            return;
+        }
+        const memosTextarea = document.querySelector(".common-editor-inputer");
+        memosTextarea.value = '[@' + a.creatorName + '](' + a.url + ') \n\n> ' + a.creatorName + ': ' + a.content;
+        memosTextarea.style.height = memosTextarea.scrollHeight + 'px';
+        document.body.scrollIntoView({behavior: 'smooth'});
+    },
+    //编辑按钮
+    getEditBtn: (memosUrl, memosId) => {
+        let editBtn = '';
+        let memosDomain = localStorage.getItem("apiUrl") || '';
+        if (memosDomain) {
+            var url = new URL(memosDomain);
+            var remoteUrl = new URL(memosUrl).origin
+            if (url.origin && url.origin === remoteUrl) {
+                editBtn += `<a onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </a>`;
+            }
+            return editBtn;
+        }
+    },
+    openMemosEditForm: function () {
+        var isHide = window.localStorage && window.localStorage.getItem("memos-editor-display");
+        //打开编辑框
+        if (isHide && JSON.parse(isHide)) {
+            var editFormDom = document.querySelector('#memoPage');
+            if (editFormDom.classList.contains('d-none')) {
+                editFormDom.classList.remove('d-none');
+            }
+        }
+        var memosOpenId = window.localStorage && window.localStorage.getItem("memos-access-token");
+        if (!memosOpenId) {
+            $.message({
+                message: '请先填写好 API 链接!'
+            })
+            return false;
+        }
+        return true;
+    },
+    memosEdit: (apiUrl, memosId) => {
+        if (!leonus.openMemosEditForm()) {
+            return;
+        }
+        var memosTextarea = document.querySelector(".common-editor-inputer");
+        var submitBtn = document.querySelector('#content_submit_text');
+        submitBtn.classList.add('d-none');
+        var editMemoDom = document.querySelector('.edit-memos');
+        editMemoDom.classList.remove('d-none');
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        if (getUrl && memosId) {
+            fetch(getUrl).then(res => res.json()).then(resdata => {
+                localStorage.setItem("memos-resource-list", resdata.resourceList);
+                localStorage.setItem("memos-edit-url", getUrl);
+                localStorage.setItem("memos-edit-id", memosId);
+                memosTextarea.value = resdata.content;
+                //可见性
+                leonus.editVisibility(resdata.visibility);
+                if (resdata.resourceList && resdata.resourceList.length > 0) {
+                    let imageList = "";
+                    let remoteResourceIdList = [];
+                    for (var i = 0; i < resdata.resourceList.length; i++) {
+                        imageList += '<div data-id="' + resdata.resourceList[i].id + '" class="memos-tag d-flex" onclick="leonus.deleteImage(this)"><div class="d-flex px-2 justify-content-center">' + resdata.resourceList[i].filename + '</div></div>'
+                        remoteResourceIdList.push(resdata.resourceList[i].id);
+                    }
+                    localStorage.setItem("resourceIdList", JSON.stringify(remoteResourceIdList));
+                    document.querySelector(".memos-image-list").insertAdjacentHTML('afterbegin', imageList);
+                }
+                memosTextarea.style.height = memosTextarea.scrollHeight + 'px';
+                document.body.scrollIntoView({behavior: 'smooth'});
+            })
+        }
+
+    },
+    editSubmit: () => {
+        var memoUrl = localStorage.getItem("memos-edit-url");
+        if (!memoUrl) {
+            var memosId = localStorage.getItem("memos-edit-id");
+            let memosDomain = localStorage.getItem("apiUrl") || '';
+            if (!memosId || !memosDomain) {
+                console.log('memosId of edited memos or memosDomain is null.');
+                return;
+            }
+            memoUrl = memosDomain.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        }
+        var submitMemoBtn = document.querySelector('#content_submit_text');
+        var editMemoDom = document.querySelector('.edit-memos');
+        let memoBody = {
+            content: document.querySelector(".common-editor-inputer").value,
+            relationList: [],
+            resourceIdList: JSON.parse(localStorage.getItem("resourceIdList")),
+            visibility: localStorage.getItem("memoLock")
+        }
+        fetch(memoUrl, {
+            method: 'PATCH',
+            body: JSON.stringify(memoBody),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function (res) {
+            if (res.status === 200) {
+                $.message({
+                    message: '编辑成功'
+                });
+                submitMemoBtn.classList.remove("d-none");
+                editMemoDom.classList.add("d-none");
+                localStorage.removeItem("resourceIdList");
+                localStorage.removeItem("contentNow");
+                localStorage.removeItem("memos-edit-url");
+                localStorage.removeItem("memos-edit-id");
+                localStorage.removeItem("memos-resource-list");
+                location.reload();
+            }
+        })
+    },
+    cancelEdit: () => {
+        var memosTextarea = document.querySelector('.common-editor-inputer');
+        var editMemoDom = document.querySelector('.edit-memos');
+        if (!editMemoDom.classList.contains("d-none")) {
+            memosTextarea.value = '';
+            memosTextarea.style.height = 'inherit';
+            editMemoDom.classList.add("d-none");
+            document.querySelector('#content_submit_text').classList.remove("d-none");
+            document.querySelector(".memos-image-list").innerHTML = '';
+            localStorage.removeItem("resourceIdList");
+            localStorage.removeItem("memos-resource-list");
+            localStorage.removeItem("contentNow");
+            localStorage.removeItem("memos-edit-url");
+            localStorage.removeItem("memos-edit-id");
+        }
+    },
+    deleteImage: (e) => {
+        if (e) {
+            let memoId = e.getAttribute("data-id")
+            let memosResource = window.localStorage && JSON.parse(window.localStorage.getItem("resourceIdList"));
+            let memosResourceList = memosResource.filter(function (item) {
+                return item != memoId
+            });
+            window.localStorage && window.localStorage.setItem("resourceIdList", JSON.stringify(memosResourceList));
+            e.remove()
+        }
+    },
+    editVisibility: (visibility) => {
+        let v = visibility || 'PUBLIC';
+        let tv = '所有人可见';
+        if (v == "PUBLIC") {
+            tv = "所有人可见"
+        } else if (v == "PRIVATE") {
+            tv = "仅自己可见"
+        } else if (v == "PROTECTED") {
+            tv = "登录用户可见"
+        }
+        localStorage.setItem("memoLock", v);
+        document.querySelector("#lock-now").value = tv;
     }
 };

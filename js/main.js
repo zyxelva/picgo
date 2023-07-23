@@ -46,6 +46,31 @@
 })();
 // Lazyload End
 
+// 解析 TAG 标签，添加样式
+const TAG_REG = /#([^\s#]+?)\s/g;
+// 解析 BiliBili
+const BILIBILI_REG = /<a\shref="https:\/\/www\.bilibili\.com\/video\/((av[\d]{1,10})|(BV([\w]{10})))\/?">.*<\/a>/g;
+// 解析网易云音乐
+const NETEASE_MUSIC_REG = /<a\shref="https:\/\/music\.163\.com\/.*id=([0-9]+)".*?>.*<\/a>/g;
+// 解析 QQ 音乐
+const QQMUSIC_REG = /<a\shref="https\:\/\/y\.qq\.com\/.*(\/[0-9a-zA-Z]+)(\.html)?".*?>.*?<\/a>/g;
+// 解析腾讯视频
+const QQVIDEO_REG = /<a\shref="https:\/\/v\.qq\.com\/.*\/([a-z|A-Z|0-9]+)\.html".*?>.*<\/a>/g;
+// 解析 Spotify
+const SPOTIFY_REG = /<a\shref="https:\/\/open\.spotify\.com\/(track|album)\/([\s\S]+)".*?>.*<\/a>/g;
+// 解析优酷视频
+const YOUKU_REG = /<a\shref="https:\/\/v\.youku\.com\/.*\/id_([a-z|A-Z|0-9|==]+)\.html".*?>.*<\/a>/g;
+//解析 Youtube
+const YOUTUBE_REG = /<a\shref="https:\/\/www\.youtube\.com\/watch\?v\=([a-z|A-Z|0-9]{11})\".*?>.*<\/a>/g;
+//去除markdown图片
+const MARKDOWN_PICS = /\!\[.*?\]\(.*?\)/g;
+//去除```...```整个包裹内容
+const ANTI_REFS = /```([\W\w]+)```/g;
+//去除<pre>
+const HTML_PRE=/\<pre\>[\W\w]+\<\/pre\>/g;
+//内置图片，被markedjs解析的，干掉
+const MARKED_JS_PICS=/\<div class\=\"waterfall\" id\=\"encrypt\-blog\"\>.*\<\/div\>/g;
+
 var limit = memos.limit
 var memoUrl = memos.host + memos.path + "?creatorId=" + memos.creatorId + "&rowStatus=NORMAL"
 var page = 1,
@@ -192,30 +217,6 @@ function updateTwikoo(data) {
 // 插入 html
 function updateHTMl(data, type) {
     var memoResult = "", resultAll = "";
-    // 解析 TAG 标签，添加样式
-    const TAG_REG = /#([^\s#]+?)\s/g;
-    // 解析 BiliBili
-    const BILIBILI_REG = /<a\shref="https:\/\/www\.bilibili\.com\/video\/((av[\d]{1,10})|(BV([\w]{10})))\/?">.*<\/a>/g;
-    // 解析网易云音乐
-    const NETEASE_MUSIC_REG = /<a\shref="https:\/\/music\.163\.com\/.*id=([0-9]+)".*?>.*<\/a>/g;
-    // 解析 QQ 音乐
-    const QQMUSIC_REG = /<a\shref="https\:\/\/y\.qq\.com\/.*(\/[0-9a-zA-Z]+)(\.html)?".*?>.*?<\/a>/g;
-    // 解析腾讯视频
-    const QQVIDEO_REG = /<a\shref="https:\/\/v\.qq\.com\/.*\/([a-z|A-Z|0-9]+)\.html".*?>.*<\/a>/g;
-    // 解析 Spotify
-    const SPOTIFY_REG = /<a\shref="https:\/\/open\.spotify\.com\/(track|album)\/([\s\S]+)".*?>.*<\/a>/g;
-    // 解析优酷视频
-    const YOUKU_REG = /<a\shref="https:\/\/v\.youku\.com\/.*\/id_([a-z|A-Z|0-9|==]+)\.html".*?>.*<\/a>/g;
-    //解析 Youtube
-    const YOUTUBE_REG = /<a\shref="https:\/\/www\.youtube\.com\/watch\?v\=([a-z|A-Z|0-9]{11})\".*?>.*<\/a>/g;
-    //去除markdown图片
-    const MARKDOWN_PICS = /\!\[.*?\]\(.*?\)/g;
-    //去除```...```整个包裹内容
-    const ANTI_REFS = /```([\W\w]+)```/g;
-    //去除<pre>
-    const HTML_PRE=/\<pre\>[\W\w]+\<\/pre\>/g;
-    //内置图片，被markedjs解析的，干掉
-    const MARKED_JS_PICS=/\<div class\=\"waterfall\" id\=\"encrypt\-blog\"\>.*\<\/div\>/g;
 
     // Marked Options
     marked.setOptions({
@@ -410,6 +411,13 @@ themeToggle.addEventListener("click", () => {
     );
 });
 postToggle.addEventListener('click',()=>{
-    $("#memoPage").toggle();
+    $("#memoPage").toggleClass("d-none");
+    let isHide=true;
+    if($("#memoPage").hasClass("d-none")){
+        isHide = true;
+    } else {
+        isHide = false;
+    }
+    localStorage.setItem("memos-editor-display", isHide);
 });
 // Darkmode End

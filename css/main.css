@@ -466,3 +466,25 @@ input.inputer {
     --tw-text-opacity: 1;
     color: rgb(156 163 175 / var(--tw-text-opacity))
 }
+
+.line-xl {
+    line-height: 2rem;
+}
+
+.d-flex {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: grid !important;
+}
+
+.flex-fill {
+    -ms-flex: 1 1 auto !important;
+    flex: 1 1 auto !important;
+}
+
+.memos-tag {
+    white-space: nowrap;
+    border-radius: 0.33rem;
+    background-color: var(--color-text-hover);
+    cursor: default;
+    margin-right: 0.5rem !important;
+}
