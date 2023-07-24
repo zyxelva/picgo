@@ -1,64 +1,8 @@
 "use strict";
 //正则
-const IMG_REG = /\!\[(.*?)\]\((.*?)\)/g,
-    LINK_REG = /(?<!!)\[(.*?)\]\((.*?)\)/g,
-    LINE_REG = /\n/g,
-    BLOCK_QUOTE_REG = /\>.*$/g,
-    CODE_REG = /\```.*$/g;
+const IMG_REG = /\!\[(.*?)\]\((.*?)\)/g, LINK_REG = /(?<!!)\[(.*?)\]\((.*?)\)/g, LINE_REG = /\n/g,
+    BLOCK_QUOTE_REG = /\>.*$/g, CODE_REG = /\```.*$/g;
 var leonus = {
-    cp: () => {
-        document.body.addEventListener("copy", (e => {
-            "TEXTAREA" == e.target.tagName && "" == e.target.className || btf.snackbarShow("复制成功~")
-        })), document.body.addEventListener("paste", (() => {
-            btf.snackbarShow("粘贴成功~")
-        }))
-    },
-    addScript: (e, t, n) => {
-        if (document.getElementById(e)) return n ? n() : void 0;
-        let a = document.createElement("script");
-        a.src = t, a.id = e, n && (a.onload = n), document.head.appendChild(a)
-    },
-    gotoID: e => {
-        var t = location.href;
-        location.href = "#" + e, history.replaceState(null, null, t);
-        let n = document.getElementById(e).offsetTop - 60;
-        window.scrollTo({top: n})
-    },
-    addMusic: () => {
-        let e = null;
-        e = document.body.clientWidth > 768 ? document.getElementById("pcMusic") : document.getElementById("phMusic"), e && (e.innerHTML = '<meting-js id="7903334636" server="tencent" type="playlist" theme="var(--leonus-purple)" order="random" preload="metadata" listFolded="true"></meting-js>')
-    },
-    musicBtn: () => {
-        if (document.querySelector("#pcMusic .aplayer")) {
-            let e = document.querySelector("#nav .music-btn");
-            e && (e.style.display = "block")
-        }
-    },
-    talkTime: null,
-    indexTalk: () => {
-        if (leonus.talkTime && (clearInterval(leonus.talkTime), leonus.talkTime = null), !document.getElementById("bber-talk")) return;
-
-        function e(e) {
-            let t = "";
-            e.forEach(((e, n) => {
-                t += `<li class="item item-${n + 1}">${e}</li>`
-            }));
-            let n = document.querySelector("#bber-talk .talk-list");
-            n && (n.innerHTML = t, leonus.talkTime = setInterval((() => {
-                n.appendChild(n.children[0])
-            }), 3e3))
-        }
-
-        let t = saveToLocal.get("talk");
-        t ? e(t) : fetch("https://m.leonus.cn/api/memo?creatorId=1&tag=说说&limit=10").then((e => e.json())).then((t => {
-            e(t = function (e) {
-                let t = [];
-                return e.forEach((e => {
-                    t.push(e.content.replace(/#(.*?)\s/g, "").replace(/{\s*music\s*(.*)\s*}/g, '<i class="fa-solid fa-music"></i>').replace(/{\s*bilibili\s*(.*)\s*}/g, '<i class="fa-brands fa-bilibili"></i>').replace(/```/g, "").replace(/\!\[(.*?)\]\((.*?)\)/g, '<i class="fa-solid fa-image"></i>').replace(/\[(.*?)\]\((.*?)\)/g, '<i class="fa-solid fa-link"></i>'))
-                })), t
-            }(t.data)), saveToLocal.set("talk", t, .01)
-        }))
-    },
     //解析所有memos内的图片，包括md格式的，内置资源的（上传至memos服务器的图片）
     procMemosGalleries: (memosUrl, memosData, limit, className) => {
         if (!(memosData && memosData.length > 0)) {
@@ -72,8 +16,8 @@ var leonus = {
         imgs.forEach(item => {
             if (item && nowNum < limit) {
                 nowNum++
-                let img = item.replace(/!\[.*?\]\((.*?)\)/g, '$1'),
-                    time, title, tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
+                let img = item.replace(/!\[.*?\]\((.*?)\)/g, '$1'), time, title,
+                    tat = item.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
                 if (tat.indexOf(' ') !== -1) {
                     time = tat.split(' ')[0];
                     title = tat.split(' ')[1];
@@ -180,7 +124,7 @@ var leonus = {
         let memosId = singleData.id;
         let memosForm = leonus.getMemosForm(memosUrl, singleData);
         let editBtn = leonus.getEditBtn(memosUrl, memosId);
-        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer"><i class="fa-solid fa-share-from-square"></i></a>${editBtn}</div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
+        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer" title="评论"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer" title="转发"><i class="fa-solid fa-share-from-square"></i></a>${editBtn}</div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
         return memoContREG;
     },
     //twikoo
@@ -197,9 +141,7 @@ var leonus = {
             twikooDom.insertAdjacentHTML('beforeend', twikooCon);
             twikooDom.classList.remove('d-none');
             twikoo.init({
-                envId: envId,
-                el: '#twikoo',
-                path: memosUrl + "/m/" + memosId
+                envId: envId, el: '#twikoo', path: memosUrl + "/m/" + memosId
             });
         } else {
             twikooDom.classList.add('d-none');
@@ -326,16 +268,13 @@ var leonus = {
         }
         //转发内容实体
         let memosForm = {
-            id: data.id,
-            creatorName: data.creatorName,
-            content: transData,
-            url: memosUrl + 'm/' + data.id
+            id: data.id, creatorName: data.creatorName, content: transData, url: memosUrl + 'm/' + data.id
         };
         return JSON.stringify(memosForm).replace(/"/g, '&quot;');
     },
     //转发
     transPond: (a) => {
-        if (!leonus.openMemosEditForm()) {
+        if (!leonus.openMemosEditForm(true)) {
             return;
         }
         //引用内容关联
@@ -345,7 +284,7 @@ var leonus = {
         memosTextarea.style.height = memosTextarea.scrollHeight + 'px';
         document.body.scrollIntoView({behavior: 'smooth'});
     },
-    //编辑按钮
+    //编辑/归档/删除按钮
     getEditBtn: (memosUrl, memosId) => {
         let editBtn = '';
         let memosDomain = localStorage.getItem("apiUrl") || '';
@@ -353,21 +292,29 @@ var leonus = {
             var url = new URL(memosDomain);
             var remoteUrl = new URL(memosUrl).origin
             if (url.origin && url.origin === remoteUrl) {
-                editBtn += `<a onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer">
+                editBtn += `<a onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="编辑">
                             <i class="fa-regular fa-pen-to-square"></i>
+                        </a>`;
+                editBtn += `<a onclick="leonus.memosArchive('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="归档">
+                            <i class="fas fa-archive"></i>
+                        </a>`;
+                editBtn += `<a onclick="leonus.memosDelete('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="删除">
+                            <i class="fa-regular fa-trash-can"></i>
                         </a>`;
             }
         }
         return editBtn;
     },
-    openMemosEditForm: function () {
-        //打开编辑框
-        var editFormDom = document.querySelector('#memoPage');
-        if (editFormDom.classList.contains('d-none')) {
-            editFormDom.classList.remove('d-none');
-            localStorage.setItem("memos-editor-display", true);
+    //打开发布框
+    openMemosEditForm: function (needEditForm) {
+        if (needEditForm) {
+            //打开编辑框
+            var editFormDom = document.querySelector('#memoPage');
+            if (editFormDom.classList.contains('d-none')) {
+                editFormDom.classList.remove('d-none');
+                localStorage.setItem("memos-editor-display", true);
+            }
         }
-
         var memosOpenId = window.localStorage && window.localStorage.getItem("memos-access-token");
         if (!memosOpenId) {
             $.message({
@@ -377,8 +324,9 @@ var leonus = {
         }
         return true;
     },
+    //将待编辑的memos数据赋值到发布框
     memosEdit: (apiUrl, memosId) => {
-        if (!leonus.openMemosEditForm()) {
+        if (!leonus.openMemosEditForm(true)) {
             return;
         }
         var memosTextarea = document.querySelector(".common-editor-inputer");
@@ -411,6 +359,58 @@ var leonus = {
         }
 
     },
+    //归档memos
+    memosArchive: (apiUrl, memosId) => {
+        if (!leonus.openMemosEditForm(false)) {
+            return;
+        }
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        if (getUrl && memosId) {
+            var memoBody = {id: memosId, rowStatus: "ARCHIVED"};
+            fetch(getUrl, {
+                method: 'PATCH', body: JSON.stringify(memoBody), headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $.message({
+                        message: '归档成功'
+                    });
+                    location.reload();
+                }
+            }).catch(err => {
+                $.message({
+                    message: '归档出错了，再检查一下吧'
+                })
+            })
+        }
+    },
+    //删除memos
+    memosDelete: (apiUrl, memosId) => {
+        if (!leonus.openMemosEditForm(false)) {
+            return;
+        }
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        if (getUrl && memosId) {
+            fetch(getUrl, {
+                method: 'DELETE', headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $.message({
+                        message: '删除成功'
+                    });
+                    location.reload();
+                }
+            }).catch(err => {
+                $.message({
+                    message: '删除出错了，再检查一下吧'
+                })
+            })
+        }
+    },
+    //保存编辑的memos
     editSubmit: () => {
         var memoUrl = localStorage.getItem("memos-edit-url");
         if (!memoUrl) {
@@ -431,9 +431,7 @@ var leonus = {
             visibility: localStorage.getItem("memoLock")
         }
         fetch(memoUrl, {
-            method: 'PATCH',
-            body: JSON.stringify(memoBody),
-            headers: {
+            method: 'PATCH', body: JSON.stringify(memoBody), headers: {
                 'Content-Type': 'application/json'
             }
         }).then(function (res) {
@@ -452,6 +450,7 @@ var leonus = {
             }
         })
     },
+    //取消编辑
     cancelEdit: () => {
         var memosTextarea = document.querySelector('.common-editor-inputer');
         var editMemoDom = document.querySelector('.edit-memos');
@@ -468,6 +467,7 @@ var leonus = {
             localStorage.removeItem("memos-edit-id");
         }
     },
+    //删除附件图片
     deleteImage: (e) => {
         if (e) {
             let memoId = e.getAttribute("data-id")
@@ -479,6 +479,7 @@ var leonus = {
             e.remove()
         }
     },
+    //可见性判定
     editVisibility: (visibility) => {
         let v = visibility || 'PUBLIC';
         let tv = '所有人可见';

@@ -474,6 +474,8 @@ input.inputer {
 .d-flex {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     display: grid !important;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 .flex-fill {
@@ -482,9 +484,14 @@ input.inputer {
 }
 
 .memos-tag {
-    white-space: nowrap;
     border-radius: 0.33rem;
     background-color: var(--color-text-hover);
     cursor: default;
     margin-right: 0.5rem !important;
+}
+
+.memos-tag .px-2 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

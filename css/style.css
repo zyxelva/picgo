@@ -247,6 +247,8 @@ blockquote {
 
 .memos__comments {
     margin-top: 0.75rem;
+    justify-content: flex-end !important;
+    display: flex;
 }
 
 .d-none {
