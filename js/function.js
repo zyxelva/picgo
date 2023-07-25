@@ -261,7 +261,7 @@ var leonus = {
     getMemosForm: (memosUrl, data) => {
         let transData = data.content.replace(/#([^\s#]+?)\s/g, "")//tag
             .replace(/\!\[(.*?)\]\((.*?)\)/g, "")//image
-            .replace(/(?<!!)\[(.*?)\]\((.*?)\)/g, "$1")//link
+            .replace(/\[(.*?)\]\((.*?)\)/g, "$1")//link
             .replace(/\n/g, " ")//line
             .replace(/\>.*$/g, "")//block quote
             .replace(/\```.*$/g, "");//code
