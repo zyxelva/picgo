@@ -449,6 +449,13 @@ blockquote {
     }
 }
 
+@media (min-width: 993px) {
+    .bibi {
+        width: 65% !important;
+        max-width: 100%;
+    }
+}
+
 .resimg {
     width: 100%;
     overflow: hidden;

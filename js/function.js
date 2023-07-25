@@ -1,7 +1,4 @@
 "use strict";
-//正则
-const IMG_REG = /\!\[(.*?)\]\((.*?)\)/g, LINK_REG = /(?<!!)\[(.*?)\]\((.*?)\)/g, LINE_REG = /\n/g,
-    BLOCK_QUOTE_REG = /\>.*$/g, CODE_REG = /\```.*$/g;
 var leonus = {
     //解析所有memos内的图片，包括md格式的，内置资源的（上传至memos服务器的图片）
     procMemosGalleries: (memosUrl, memosData, limit, className) => {
@@ -262,13 +259,21 @@ var leonus = {
      * @returns {string}
      */
     getMemosForm: (memosUrl, data) => {
-        let transData = data.content.replace(TAG_REG, "").replace(IMG_REG, "").replace(LINK_REG, "$1").replace(LINE_REG, " ").replace(BLOCK_QUOTE_REG, "").replace(CODE_REG, "");
+        let transData = data.content.replace(/#([^\s#]+?)\s/g, "")//tag
+            .replace(/\!\[(.*?)\]\((.*?)\)/g, "")//image
+            .replace(/(?<!!)\[(.*?)\]\((.*?)\)/g, "$1")//link
+            .replace(/\n/g, " ")//line
+            .replace(/\>.*$/g, "")//block quote
+            .replace(/\```.*$/g, "");//code
         if (transData.length > 140) {
             transData = transData.substring(0, 140) + '...'
         }
         //转发内容实体
         let memosForm = {
-            id: data.id, creatorName: data.creatorName, content: transData, url: memosUrl + 'm/' + data.id
+            id: data.id,
+            creatorName: data.creatorName,
+            content: transData,
+            url: memosUrl + 'm/' + data.id
         };
         return JSON.stringify(memosForm).replace(/"/g, '&quot;');
     },
@@ -347,7 +352,7 @@ var leonus = {
                     let imageList = "";
                     let remoteResourceIdList = [];
                     for (var i = 0; i < resdata.resourceList.length; i++) {
-                        imageList += '<div data-id="' + resdata.resourceList[i].id + '" class="memos-tag d-flex" onclick="leonus.deleteImage(this)"><div class="d-flex px-2 justify-content-center">' + resdata.resourceList[i].filename + '</div></div>'
+                        imageList += '<div data-id="' + resdata.resourceList[i].id + '" class="memos-tag" onclick="leonus.deleteImage(this)"><div class="px-2 justify-content-center">' + resdata.resourceList[i].filename + '</div></div>'
                         remoteResourceIdList.push(resdata.resourceList[i].id);
                     }
                     localStorage.setItem("resourceIdList", JSON.stringify(remoteResourceIdList));
