@@ -120,8 +120,7 @@ var leonus = {
         //twikoo + forward + edit
         let memosId = singleData.id;
         let memosForm = leonus.getMemosForm(memosUrl, singleData);
-        let editBtn = leonus.getEditBtn(memosUrl, memosId);
-        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer" title="评论"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer" title="转发"><i class="fa-solid fa-share-from-square"></i></a>${editBtn}</div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
+        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer" title="评论"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer" title="转发"><i class="fa-solid fa-share-from-square"></i></a></div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
         return memoContREG;
     },
     //twikoo
@@ -310,6 +309,27 @@ var leonus = {
         }
         return editBtn;
     },
+    //按钮集合
+    getBtnSet: (memosUrl, memosId) => {
+        let editBtn = '';
+        let memosDomain = localStorage.getItem("apiUrl") || '';
+        if (memosDomain) {
+            var url = new URL(memosDomain);
+            var remoteUrl = new URL(memosUrl).origin
+            if (url.origin && url.origin === remoteUrl) {
+                editBtn += `<a class="btn3" onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="编辑">
+                            <i class="fa-regular fa-pen-to-square"></i>编辑
+                        </a>`;
+                editBtn += `<a class="btn3" onclick="leonus.memosArchive('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="归档">
+                            <i class="fas fa-archive"></i>归档
+                        </a>`;
+                editBtn += `<a class="btn3" onclick="leonus.memosDelete('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="删除">
+                            <i class="fa-regular fa-trash-can"></i>删除
+                        </a>`;
+            }
+        }
+        return editBtn;
+    },
     //打开发布框
     openMemosEditForm: function (needEditForm) {
         if (needEditForm) {
@@ -397,22 +417,44 @@ var leonus = {
         }
         var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
         if (getUrl && memosId) {
-            fetch(getUrl, {
-                method: 'DELETE', headers: {
-                    'Content-Type': 'application/json'
+            $.confirm({
+                title: 'Warning!',
+                content: '确认删除该条数据?',
+                theme: 'supervan',
+                closeIcon: true,
+                animation: 'scale',
+                type: 'red',
+                icon: 'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function () {
+                            fetch(getUrl, {
+                                method: 'DELETE', headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }).then(function (res) {
+                                if (res.status === 200) {
+                                    $.message({
+                                        message: '删除成功'
+                                    });
+                                    location.reload();
+                                }
+                            }).catch(err => {
+                                console.warn('Error msg: ' + err);
+                                $.message({
+                                    message: '删除出错了，再检查一下吧'
+                                })
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                    }
                 }
-            }).then(function (res) {
-                if (res.status === 200) {
-                    $.message({
-                        message: '删除成功'
-                    });
-                    location.reload();
-                }
-            }).catch(err => {
-                $.message({
-                    message: '删除出错了，再检查一下吧'
-                })
-            })
+            });
         }
     },
     //保存编辑的memos
