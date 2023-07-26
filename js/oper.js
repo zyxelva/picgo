@@ -127,7 +127,7 @@ function uploadImage(data) {
                 console.log(result)
                 if (result.id) {
                     let imageList = "";
-                    imageList += '<div data-id="' + result.id + '" class="memos-tag d-flex" onclick="deleteImage(this)"><div class="d-flex px-2 justify-content-center">' + result.filename + '</div></div>'
+                    imageList += '<div data-id="' + result.id + '" class="memos-tag" onclick="leonus.deleteImage(this)"><div class="px-2 justify-content-center">' + result.filename + '</div></div>'
                     document.querySelector(".memos-image-list").insertAdjacentHTML('afterbegin', imageList);
                     //获取到图片
                     //这里判断下是否已存在资源列表（编辑时会有）
@@ -473,6 +473,8 @@ function sendText() {
             success: function (result) {
                 //发送成功
                 getOne(result.id)
+                document.querySelector(".memos-image-list").innerHTML = '';
+                localStorage.removeItem("memos-resource-list");
                 localStorage.removeItem("resourceIdList");
                 localStorage.removeItem("contentNow");
                 localStorage.removeItem('relationList');

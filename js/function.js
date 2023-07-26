@@ -288,27 +288,6 @@ var leonus = {
         memosTextarea.style.height = memosTextarea.scrollHeight + 'px';
         document.body.scrollIntoView({behavior: 'smooth'});
     },
-    //编辑/归档/删除按钮
-    getEditBtn: (memosUrl, memosId) => {
-        let editBtn = '';
-        let memosDomain = localStorage.getItem("apiUrl") || '';
-        if (memosDomain) {
-            var url = new URL(memosDomain);
-            var remoteUrl = new URL(memosUrl).origin
-            if (url.origin && url.origin === remoteUrl) {
-                editBtn += `<a onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="编辑">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </a>`;
-                editBtn += `<a onclick="leonus.memosArchive('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="归档">
-                            <i class="fas fa-archive"></i>
-                        </a>`;
-                editBtn += `<a onclick="leonus.memosDelete('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="删除">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </a>`;
-            }
-        }
-        return editBtn;
-    },
     //按钮集合
     getBtnSet: (memosUrl, memosId) => {
         let editBtn = '';
@@ -354,6 +333,8 @@ var leonus = {
         if (!leonus.openMemosEditForm(true)) {
             return;
         }
+        //将附件列表置空
+        document.querySelector(".memos-image-list").innerHTML = '';
         var memosTextarea = document.querySelector(".common-editor-inputer");
         var submitBtn = document.querySelector('#content_submit_text');
         submitBtn.classList.add('d-none');
@@ -510,6 +491,7 @@ var leonus = {
             localStorage.removeItem("resourceIdList");
             localStorage.removeItem("memos-resource-list");
             localStorage.removeItem("contentNow");
+            localStorage.removeItem('relationList');
             localStorage.removeItem("memos-edit-url");
             localStorage.removeItem("memos-edit-id");
         }
