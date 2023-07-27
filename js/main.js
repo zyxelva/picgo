@@ -313,14 +313,16 @@ function updateHTMl(data, type) {
 //处理按钮集合
 function procBtns(memosUrl, memosId) {
     let btnSet = leonus.getBtnSet(memosUrl, memosId);
-    let btns = `
+    if (!btnSet) {
+        return '';
+    }
+    return `
         <div class="btnsContainer">
             <span class="more-action-btn" onclick="showBtns('btns_${memosId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-img"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></span>
         </div>
         <div class="more-action-btns-wrapper d-none" id="btns_${memosId}">
             <div class="more-action-btns-container min-w-[6em]">${btnSet}</div>
        </div>`;
-    return btns;
 }
 
 function showBtns(btnId) {
