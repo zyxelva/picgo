@@ -226,7 +226,7 @@ blockquote {
 .memos__content:before {
     content: '';
     position: absolute;
-    background: url('/medias/avatar/avatar2.jpg') no-repeat;
+    background: url('https://gcore.jsdelivr.net/gh/zyxelva/picgo/markdown/0fa5dbfc06f4ec40a6d349e6c434e563.jpeg') no-repeat;
     background-size: contain;
     width: 45px;
     height: 45px;
