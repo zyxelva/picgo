@@ -289,13 +289,17 @@ var leonus = {
         document.body.scrollIntoView({behavior: 'smooth'});
     },
     //按钮集合
-    getBtnSet: (memosUrl, memosId) => {
+    getBtnSet: (memosUrl, memosId, pinnedFlag) => {
         let editBtn = '';
         let memosDomain = localStorage.getItem("apiUrl") || '';
         if (memosDomain) {
             var url = new URL(memosDomain);
-            var remoteUrl = new URL(memosUrl).origin
+            var remoteUrl = new URL(memosUrl).origin;
+            var pinText = pinnedFlag ? '取消置顶' : '置顶';
             if (url.origin && url.origin === remoteUrl) {
+                editBtn += `<a class="btn3" onclick="leonus.memosPin('${memosDomain}', ${memosId}, ${!pinnedFlag})" rel="noopener noreferrer" title="${pinText}">
+                            <i class="fa-solid fa-thumbtack"></i>${pinText}
+                        </a>`;
                 editBtn += `<a class="btn3" onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="编辑">
                             <i class="fa-regular fa-pen-to-square"></i>编辑
                         </a>`;
@@ -327,6 +331,34 @@ var leonus = {
             return false;
         }
         return true;
+    },
+    //置顶
+    memosPin: (apiUrl, memosId, pinnedFlag) => {
+        if (!leonus.openMemosEditForm(true)) {
+            return;
+        }
+        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '/organizer' + '$1') || '';
+        if (getUrl && memosId) {
+            var memoBody = {pinned: pinnedFlag};
+            fetch(getUrl, {
+                method: 'POST',
+                body: JSON.stringify(memoBody),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $.message({
+                        message: pinnedFlag ? '置顶成功' : '取消置顶成功'
+                    });
+                    location.reload();
+                }
+            }).catch(err => {
+                $.message({
+                    message: '归档出错了，再检查一下吧'
+                })
+            })
+        }
     },
     //将待编辑的memos数据赋值到发布框
     memosEdit: (apiUrl, memosId) => {
@@ -459,7 +491,9 @@ var leonus = {
             visibility: localStorage.getItem("memoLock")
         }
         fetch(memoUrl, {
-            method: 'PATCH', body: JSON.stringify(memoBody), headers: {
+            method: 'PATCH',
+            body: JSON.stringify(memoBody),
+            headers: {
                 'Content-Type': 'application/json'
             }
         }).then(function (res) {
