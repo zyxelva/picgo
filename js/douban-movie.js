@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function movieShow(fetch_href, fetch_item, doubanMovieDom) {
     var storage = localStorage.getItem(fetch_item);
     var data = JSON.parse(storage);
-    var db_star = data.rating;
-    var allstarPercent = toPercent(data.rating / 10);
+    var db_star = data.rating || 8;
+    var allstarPercent = toPercent(db_star / 10);
     var img = data.cover_image_url;
     var title = data.title;
     var html = '';

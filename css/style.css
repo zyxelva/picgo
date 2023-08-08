@@ -190,7 +190,7 @@ blockquote {
 
 .total {
     text-align: left;
-    color: yellow;
+    color: var(--color-link);
 }
 
 .memos {
