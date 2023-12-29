@@ -1,4 +1,5 @@
 var apiUrl = localStorage.getItem('apiUrl') || ''
+var memosToken = localStorage.getItem('memos-access-token') || ''
 var memoLock = localStorage.getItem('memoLock') || ''
 var contentNow = localStorage.getItem('contentNow') || ''
 var hidetag = localStorage.getItem('hidetag') || ''
@@ -8,11 +9,12 @@ $('#showInput').val(showtag)
 const apiReg = /openId=([^&]*)/;
 const urlReg = /(.+?)(?:\/api)/;
 
-if (apiUrl == '') {
+if (apiUrl == '' || memosToken=='') {
     $('#blog_info').show()
 } else {
     $('#blog_info').hide()
     $('#apiUrl').val(apiUrl)
+    $('#apiToken').val(memosToken)
 }
 if (memoLock) {
     if (memoLock == "PUBLIC") {
@@ -158,7 +160,7 @@ function uploadImage(data) {
 $('#saveKey').click(function () {
     // 保存数据
     let memosApi = $('#apiUrl').val();
-    let memosOpenId = memosApi.match(apiReg)[1];
+    let memosOpenId = $('#apiToken').val();
     let urlRes = memosApi.match(urlReg)[1];
     localStorage.setItem("apiUrl", memosApi);
     localStorage.setItem("memos-access-path", urlRes);
@@ -442,8 +444,9 @@ $('#content_submit_text').click(function () {
 })
 
 function sendText() {
-    if (localStorage.getItem('apiUrl')) {
+    if (localStorage.getItem('apiUrl') && localStorage.getItem("memos-access-token")) {
         apiUrl = localStorage.getItem('apiUrl')
+        memosToken = localStorage.getItem("memos-access-token");
         $.message({message: '发送中～～'})
         //$("#content_submit_text").attr('disabled','disabled');
         let content = $("textarea[name=text]").val()
@@ -468,6 +471,7 @@ function sendText() {
                 'resourceIdList': JSON.parse(localStorage.getItem("resourceIdList")) || [],
                 'relationList': relationList
             }),
+            headers: {'Accept': 'application/json', 'Authorization': `Bearer ${memosToken}`},
             contentType: "application/json;",
             dataType: "json",
             success: function (result) {
@@ -491,7 +495,7 @@ function sendText() {
         })
     } else {
         $.message({
-            message: '请先填写好 API 链接'
+            message: '请先填写好 API 相关信息！'
         })
     }
 }

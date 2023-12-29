@@ -323,10 +323,17 @@ var leonus = {
                 localStorage.setItem("memos-editor-display", true);
             }
         }
+        var memosApi = window.localStorage && window.localStorage.getItem("apiUrl");
+        if (!memosApi) {
+            $.message({
+                message: '请先填写好 API Url!'
+            })
+            return false;
+        }
         var memosOpenId = window.localStorage && window.localStorage.getItem("memos-access-token");
         if (!memosOpenId) {
             $.message({
-                message: '请先填写好 API 链接!'
+                message: '请先填写好 API token!'
             })
             return false;
         }
@@ -337,6 +344,7 @@ var leonus = {
         if (!leonus.openMemosEditForm(true)) {
             return;
         }
+        var memosOpenId = localStorage.getItem("memos-access-token");
         var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '/organizer' + '$1') || '';
         if (getUrl && memosId) {
             var memoBody = {pinned: pinnedFlag};
@@ -344,6 +352,7 @@ var leonus = {
                 method: 'POST',
                 body: JSON.stringify(memoBody),
                 headers: {
+                    'Authorization': `Bearer ${memosOpenId}`,
                     'Content-Type': 'application/json'
                 }
             }).then(function (res) {
@@ -402,11 +411,15 @@ var leonus = {
         if (!leonus.openMemosEditForm(false)) {
             return;
         }
+        var memosOpenId = localStorage.getItem("memos-access-token");
         var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
         if (getUrl && memosId) {
             var memoBody = {id: memosId, rowStatus: "ARCHIVED"};
             fetch(getUrl, {
-                method: 'PATCH', body: JSON.stringify(memoBody), headers: {
+                method: 'PATCH',
+                body: JSON.stringify(memoBody),
+                headers: {
+                    'Authorization': `Bearer ${memosOpenId}`,
                     'Content-Type': 'application/json'
                 }
             }).then(function (res) {
@@ -428,6 +441,7 @@ var leonus = {
         if (!leonus.openMemosEditForm(false)) {
             return;
         }
+        var memosOpenId = localStorage.getItem("memos-access-token");
         var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
         if (getUrl && memosId) {
             $.confirm({
@@ -444,7 +458,9 @@ var leonus = {
                         btnClass: 'btn-primary',
                         action: function () {
                             fetch(getUrl, {
-                                method: 'DELETE', headers: {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${memosOpenId}`,
                                     'Content-Type': 'application/json'
                                 }
                             }).then(function (res) {
@@ -482,6 +498,7 @@ var leonus = {
             }
             memoUrl = memosDomain.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
         }
+        var memosOpenId = localStorage.getItem("memos-access-token");
         var submitMemoBtn = document.querySelector('#content_submit_text');
         var editMemoDom = document.querySelector('.edit-memos');
         let memoBody = {
@@ -494,6 +511,7 @@ var leonus = {
             method: 'PATCH',
             body: JSON.stringify(memoBody),
             headers: {
+                'Authorization': `Bearer ${memosOpenId}`,
                 'Content-Type': 'application/json'
             }
         }).then(function (res) {

@@ -305,7 +305,9 @@ function updateHTMl(data, type) {
     }
     //解析豆瓣电影和豆瓣阅读
     // leonus.fetchNeoDB()
-    document.querySelector('button.button-load').textContent = '加载更多';
+    if (document.querySelector('button.button-load')) {
+        document.querySelector('button.button-load').textContent = '加载更多';
+    }
 }
 
 // Memos End
