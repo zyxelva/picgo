@@ -72,9 +72,10 @@ const HTML_PRE=/\<pre\>[\W\w]+\<\/pre\>/g;
 const MARKED_JS_PICS=/\<div class\=\"waterfall\" id\=\"encrypt\-blog\"\>.*\<\/div\>/g;
 
 var limit = memos.limit
-var memoUrl = memos.host + memos.path + "?creatorId=" + memos.creatorId + "&rowStatus=NORMAL"
+var memoUrl = memos.host + memos.path + "/memos?filter=creator==\"" + memos.creatorId + "\""+"&state=NORMAL"
 var page = 1,
     offset = 0,
+    globalToken='',
     nextLength = 0,
     nextDom = '';
 var tag = '';
@@ -95,15 +96,17 @@ if (memoDom) {
             btnRemove = 1
             return
         }
-        getNextList()
+        getNextList(globalToken)
     });
 }
 
 function getFirstList() {
-    var memoUrl_first = memoUrl + "&limit=" + limit;
+    var memoUrl_first = memoUrl + "&pageSize=" + limit;
     fetch(memoUrl_first).then(res => res.json()).then(resdata => {
-        updateTwikoo(resdata)
-        var nowLength = resdata.length
+        var memosList=resdata.memos
+        var token=resdata.nextPageToken
+        updateTwikoo(memosList)
+        var nowLength = memosList.length
         if (nowLength < limit) { // 返回数据条数小于 limit 则直接移除“加载更多”按钮，中断预加载
             document.querySelector("button.button-load").remove()
             btnRemove = 1
@@ -111,20 +114,23 @@ function getFirstList() {
         }
         page++
         offset = limit * (page - 1)
-        getNextList()
+        getNextList(token)
     });
 }
 
 // 预加载下一页数据
-function getNextList() {
+function getNextList(token) {
+    var memoUrl_next = memoUrl + "&pageSize=" + limit;
+    if (token){
+        memoUrl_next +="&pageToken="+token;
+    }
     if (tag) {
-        var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset + "&tag=" + tag;
-    } else {
-        var memoUrl_next = memoUrl + "&limit=" + limit + "&offset=" + offset;
+        memoUrl_next +="&tag=" + tag;
     }
     fetch(memoUrl_next).then(res => res.json()).then(resdata => {
-        nextDom = resdata
+        nextDom = resdata.memos
         nextLength = nextDom.length
+        globalToken = resdata.nextPageToken
         page++
         offset = limit * (page - 1)
         if (nextLength < 1) { // 返回数据条数为 0 ，隐藏
@@ -133,6 +139,24 @@ function getNextList() {
             return
         }
     })
+}
+
+//获取memos分页列表
+function getMemoList(tagName = null, pageToken = null) {
+    const params = new URLSearchParams();
+    params.append("pageSize", "20");
+    if (pageToken) params.append("pageToken", pageToken);
+
+    const filters = [];
+    if (tagName) filters.push(`tags.contains("${tagName}")`);
+    if (filters.length > 0) params.append("filter", filters.join(" && "));
+
+    const res = fetch(`https://s.dusays.com/api/v1/memos?${params.toString()}`, {
+        headers: {
+            "Authorization": "Bearer 你的Token"
+        }
+    });
+    return res.json();
 }
 
 // 标签选择
@@ -154,11 +178,11 @@ document.addEventListener('click', function (event) {
                     btnRemove = 1
                     return
                 }
-                getNextList()
+                getNextList(globalToken)
             });
 
         }
-        getTagFirstList();
+        // getTagFirstList();
         var filterElem = document.getElementById('tag-filter');
         filterElem.style.display = 'block';	// 显示过滤器
         var tags = document.getElementById('tags');
@@ -204,7 +228,7 @@ function getTagFirstList() {
         }
         page++
         offset = limit * (page - 1)
-        getNextList()
+        getNextList(globalToken)
     });
 }
 
@@ -288,10 +312,10 @@ function updateHTMl(data, type) {
             pinnedHtml += `<div title="置顶"><svg class="memos__verify" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#icon-a744ea7b4e0022c)"><path d="M10.6963 17.5042C13.3347 14.8657 16.4701 14.9387 19.8781 16.8076L32.62 9.74509L31.8989 4.78683L43.2126 16.1005L38.2656 15.3907L31.1918 28.1214C32.9752 31.7589 33.1337 34.6647 30.4953 37.3032C30.4953 37.3032 26.235 33.0429 22.7171 29.525L6.44305 41.5564L18.4382 25.2461C14.9202 21.7281 10.6963 17.5042 10.6963 17.5042Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/></g><defs><clipPath id="icon-a744ea7b4e0022c"><rect width="48" height="48" fill="#333"/></clipPath></defs></svg></div>`;
         }
         //按钮集合
-        let btnsContainerDiv = procBtns(memos.host, data[i].id, pinnedFlag);
+        let btnsContainerDiv = procBtns(memos.host, data[i].name, pinnedFlag);
 
         //拼接完整，成为一个memos
-        memoResult += '<li class="timeline"><div class="memos__content"><div class="memos__text"><div class="memos__userinfo"><div>' + memos.name + '</div><div class="memos__svg"><div title="认证账号"><svg viewBox="0 0 24 24" class="memos__verify"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg></div>' +pinnedHtml + '</div><div class="memos__id">@' + memos.username + '</div>' + btnsContainerDiv + '</div><p>' + memoContREG + '</p></div><div class="memos__meta"><small class="memos__date">' + moment(data[i].createdTs * 1000).twitter() + ' • 来自「<a href="' + memos.host + 'm/' + data[i].id + '" target="_blank">鑫鑫心情</a>」</small></div></div></li>'
+        memoResult += '<li class="timeline"><div class="memos__content"><div class="memos__text"><div class="memos__userinfo"><div>' + memos.name + '</div><div class="memos__svg"><div title="认证账号"><svg viewBox="0 0 24 24" class="memos__verify"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg></div>' +pinnedHtml + '</div><div class="memos__id">@' + memos.username + '</div>' + btnsContainerDiv + '</div><p>' + memoContREG + '</p></div><div class="memos__meta"><small class="memos__date">' + moment(new Date(data[i].createTime).getTime()).twitter() + ' • 来自「<a href="' + memos.host + data[i].name + '" target="_blank">鑫鑫心情</a>」</small></div></div></li>'
     }
     var memoBefore = '<ul id="memosList">'
     var memoAfter = '</ul>'
@@ -318,11 +342,12 @@ function procBtns(memosUrl, memosId, pinnedFlag) {
     if (!btnSet) {
         return '';
     }
+    var id=memosId.split("/")[1];//形如：memos/mhxUQ9frXoSTS8Jo6E7WS7
     return `
         <div class="btnsContainer">
-            <span class="more-action-btn" onclick="showBtns('btns_${memosId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-img"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></span>
+            <span class="more-action-btn" onclick="showBtns('btns_${id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-img"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></span>
         </div>
-        <div class="more-action-btns-wrapper d-none" id="btns_${memosId}">
+        <div class="more-action-btns-wrapper d-none" id="btns_${id}">
             <div class="more-action-btns-container min-w-[6em]">${btnSet}</div>
        </div>`;
 }
@@ -421,7 +446,7 @@ function getTotal() {
         // Do something for an error here
     });
 };
-window.onload = getTotal();
+// window.onload = getTotal();
 // Memos Total End
 
 // Toggle Darkmode

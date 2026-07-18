@@ -88,8 +88,8 @@ var leonus = {
             }
         }
         // 解析内置资源文件
-        if (singleData && singleData.resourceList && singleData.resourceList.length > 0) {
-            var resourceList = singleData.resourceList;
+        if (singleData && singleData.attachments && singleData.attachments.length > 0) {
+            var resourceList = singleData.attachments;
             var imgUrl = '', resUrl = '', resImgLength = 0;
             for (var j = 0; j < resourceList.length; j++) {
                 var resType = resourceList[j].type.slice(0, 5);
@@ -99,7 +99,7 @@ var leonus = {
                     resLink = resexlink
                 } else {
                     fileId = resourceList[j].publicId || resourceList[j].filename
-                    resLink = memosUrl + 'o/r/' + resourceList[j].id + '/' + fileId
+                    resLink = memosUrl + '/' + fileId
                 }
                 if (resType === 'image') {
                     imgUrl += `<div class="resimg"><a href="${resLink}" data-fancybox="gallery" class="fancybox" data-thumb="${resLink}"><img loading="lazy" src="${resLink}"/></a></div>`;
@@ -118,14 +118,14 @@ var leonus = {
         }
 
         //twikoo + forward + edit
-        let memosId = singleData.id;
+        let memosId = singleData.name;
         let memosForm = leonus.getMemosForm(memosUrl, singleData);
-        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', ${memosId}, '${envId}')" rel="noopener noreferrer" title="评论"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer" title="转发"><i class="fa-solid fa-share-from-square"></i></a></div><div id="memos_${memosId}"class='twikoo-body item-content d-none'></div>`;
+        memoContREG += `<div class="memos__comments"><a class="artalk-div"onclick="leonus.loadTwikoo('${memosUrl}', '${memosId}', '${envId}')" rel="noopener noreferrer" title="评论"><i class="fas fa-comment-dots fa-fw"></i></a><a onclick="leonus.transPond(${memosForm})" rel="noopener noreferrer" title="转发"><i class="fa-solid fa-share-from-square"></i></a></div><div id="memos_${memosId.split("/")[1]}"class='twikoo-body item-content d-none'></div>`;
         return memoContREG;
     },
     //twikoo
     loadTwikoo: (memosUrl, memosId, envId) => {
-        var twikooDom = document.querySelector('#memos_' + memosId);
+        var twikooDom = document.querySelector('#memos_' + memosId.split("/")[1]);
         var twikooCon = "<div id='twikoo'></div>"
         if (twikooDom.classList.contains('d-none')) {
             document.querySelectorAll('.twikoo-body').forEach((item) => {
@@ -137,7 +137,7 @@ var leonus = {
             twikooDom.insertAdjacentHTML('beforeend', twikooCon);
             twikooDom.classList.remove('d-none');
             twikoo.init({
-                envId: envId, el: '#twikoo', path: memosUrl + "/m/" + memosId
+                envId: envId, el: '#twikoo', path: memosUrl + memosId
             });
         } else {
             twikooDom.classList.add('d-none');
@@ -269,10 +269,10 @@ var leonus = {
         }
         //转发内容实体
         let memosForm = {
-            id: data.id,
-            creatorName: data.creatorName,
+            id: data.name,
+            creatorName: data.creator.split("/")[1],//形如：users/zyxelva
             content: transData,
-            url: memosUrl + 'm/' + data.id
+            url: memosUrl + data.name
         };
         return JSON.stringify(memosForm).replace(/"/g, '&quot;');
     },
@@ -297,16 +297,16 @@ var leonus = {
             var remoteUrl = new URL(memosUrl).origin;
             var pinText = pinnedFlag ? '取消置顶' : '置顶';
             if (url.origin && url.origin === remoteUrl) {
-                editBtn += `<a class="btn3" onclick="leonus.memosPin('${memosDomain}', ${memosId}, ${!pinnedFlag})" rel="noopener noreferrer" title="${pinText}">
+                editBtn += `<a class="btn3" onclick="leonus.memosPin('${memosDomain}', '${memosId}', ${!pinnedFlag})" rel="noopener noreferrer" title="${pinText}">
                             <i class="fa-solid fa-thumbtack"></i>${pinText}
                         </a>`;
-                editBtn += `<a class="btn3" onclick="leonus.memosEdit('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="编辑">
+                editBtn += `<a class="btn3" onclick="leonus.memosEdit('${memosDomain}', '${memosId}')" rel="noopener noreferrer" title="编辑">
                             <i class="fa-regular fa-pen-to-square"></i>编辑
                         </a>`;
-                editBtn += `<a class="btn3" onclick="leonus.memosArchive('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="归档">
+                editBtn += `<a class="btn3" onclick="leonus.memosArchive('${memosDomain}', '${memosId}')" rel="noopener noreferrer" title="归档">
                             <i class="fas fa-archive"></i>归档
                         </a>`;
-                editBtn += `<a class="btn3" onclick="leonus.memosDelete('${memosDomain}', ${memosId})" rel="noopener noreferrer" title="删除">
+                editBtn += `<a class="btn3" onclick="leonus.memosDelete('${memosDomain}', '${memosId}')" rel="noopener noreferrer" title="删除">
                             <i class="fa-regular fa-trash-can"></i>删除
                         </a>`;
             }
@@ -345,11 +345,11 @@ var leonus = {
             return;
         }
         var memosOpenId = localStorage.getItem("memos-access-token");
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '/organizer' + '$1') || '';
+        var getUrl = apiUrl + '/' + memosId || '';
         if (getUrl && memosId) {
             var memoBody = {pinned: pinnedFlag};
             fetch(getUrl, {
-                method: 'POST',
+                method: 'PATCH',
                 body: JSON.stringify(memoBody),
                 headers: {
                     'Authorization': `Bearer ${memosOpenId}`,
@@ -364,7 +364,7 @@ var leonus = {
                 }
             }).catch(err => {
                 $.message({
-                    message: '归档出错了，再检查一下吧'
+                    message: '置顶出错了，再检查一下吧！'+err
                 })
             })
         }
@@ -381,7 +381,7 @@ var leonus = {
         submitBtn.classList.add('d-none');
         var editMemoDom = document.querySelector('.edit-memos');
         editMemoDom.classList.remove('d-none');
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        var getUrl = apiUrl + '/' + memosId || '';
         var memosOpenId = localStorage.getItem("memos-access-token");
         if (getUrl && memosId) {
             fetch(getUrl, {
@@ -390,19 +390,21 @@ var leonus = {
                     'Authorization': `Bearer ${memosOpenId}`,
                     'Content-Type': 'application/json'
                 }
-                }).then(res => res.json()).then(resdata => {
-                localStorage.setItem("memos-resource-list", resdata.resourceList);
+            }).then(res => res.json()).then(resdata => {
+                localStorage.setItem("memos-resource-list", resdata.attachments);
                 localStorage.setItem("memos-edit-url", getUrl);
                 localStorage.setItem("memos-edit-id", memosId);
                 memosTextarea.value = resdata.content;
                 //可见性
                 leonus.editVisibility(resdata.visibility);
-                if (resdata.resourceList && resdata.resourceList.length > 0) {
+                if (resdata.attachments && resdata.attachments.length > 0) {
                     let imageList = "";
                     let remoteResourceIdList = [];
-                    for (var i = 0; i < resdata.resourceList.length; i++) {
-                        imageList += '<div data-id="' + resdata.resourceList[i].id + '" class="memos-tag" onclick="leonus.deleteImage(this)"><div class="px-2 justify-content-center">' + resdata.resourceList[i].filename + '</div></div>'
-                        remoteResourceIdList.push(resdata.resourceList[i].id);
+                    let id=""
+                    for (var i = 0; i < resdata.attachments.length; i++) {
+                        id = resdata.attachments[i].name.split("/")[1];
+                        imageList += '<div data-id="' + id + '" class="memos-tag" onclick="leonus.deleteImage(this)"><div class="px-2 justify-content-center">' + resdata.attachments[i].filename + '</div></div>'
+                        remoteResourceIdList.push(id);
                     }
                     localStorage.setItem("resourceIdList", JSON.stringify(remoteResourceIdList));
                     document.querySelector(".memos-image-list").insertAdjacentHTML('afterbegin', imageList);
@@ -419,9 +421,9 @@ var leonus = {
             return;
         }
         var memosOpenId = localStorage.getItem("memos-access-token");
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        var getUrl = apiUrl + '/' + memosId || '';
         if (getUrl && memosId) {
-            var memoBody = {id: memosId, rowStatus: "ARCHIVED"};
+            var memoBody = {status: "ARCHIVED"};
             fetch(getUrl, {
                 method: 'PATCH',
                 body: JSON.stringify(memoBody),
@@ -449,7 +451,7 @@ var leonus = {
             return;
         }
         var memosOpenId = localStorage.getItem("memos-access-token");
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+        var getUrl = apiUrl + '/' + memosId || '';
         if (getUrl && memosId) {
             $.confirm({
                 title: 'Warning!',
@@ -503,7 +505,7 @@ var leonus = {
                 console.log('memosId of edited memos or memosDomain is null.');
                 return;
             }
-            memoUrl = memosDomain.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1') || '';
+            memoUrl = memosDomain + '/' + memosId || '';
         }
         var memosOpenId = localStorage.getItem("memos-access-token");
         var submitMemoBtn = document.querySelector('#content_submit_text');
