@@ -435,10 +435,10 @@ window.ViewImage && ViewImage.init('.container img');
 // Memos Total Start
 // Get Memos total count
 function getTotal() {
-    var totalUrl = memos.host + memos.path + "/stats?creatorId=" + memos.creatorId
+    var totalUrl = memos.host + memos.path + "/users/" + memos.username + ":getStats"
     fetch(totalUrl).then(res => res.json()).then(resdata => {
         if (resdata) {
-            var allnums = resdata.length
+            var allnums = resdata.totalMemoCount
             var memosCount = document.getElementById('total');
             memosCount.innerHTML = allnums;
         }
@@ -446,7 +446,7 @@ function getTotal() {
         // Do something for an error here
     });
 };
-// window.onload = getTotal();
+window.onload = getTotal();
 // Memos Total End
 
 // Toggle Darkmode
