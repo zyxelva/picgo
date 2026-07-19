@@ -1,4 +1,5 @@
 let host = '';
+let limit = 500;
 
 // 适配pjax
 function whenDOMReady() {
@@ -20,9 +21,8 @@ function whenDOMReady() {
         }
     }
     host = memo.host;
-    var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=相册"
     if (location.pathname === '/photos/') {
-        photos(memoUrl);
+        photos(leonus.procMemosUrl(host + memo.path + "/memos?","相册", limit, memo.username));
     }
 }
 
@@ -38,7 +38,6 @@ window.onresize = () => {
 
 // 函数
 function photos(memoUrl) {
-    let limit = 500;
     var localAlbumUpdated = JSON.parse(localStorage.getItem("memosPicsUpdated")) || '';
     var localAlbumData = JSON.parse(localStorage.getItem("memosPicsData")) || '';
     if (localAlbumData) {
@@ -49,9 +48,15 @@ function photos(memoUrl) {
     }
 
     fetch(memoUrl).then(res => res.json()).then(resdata => {
-        var memosPicsUpdated = resdata[0].updatedTs
+        const memoList = resdata.memos || [];
+        if (memoList.length === 0) {
+            console.log("memoAlbum 没有匹配的相册备忘录");
+            return;
+        }
+        const firstItem = memoList[0];
+        const memosPicsUpdated = new Date(firstItem.updateTime).getTime();
         if (memosPicsUpdated && localAlbumUpdated != memosPicsUpdated) {
-            var memosPicsData = resdata
+            var memosPicsData = memoList
             //开始布局
             loadAlbum2(memosPicsData, limit)
             localStorage.setItem("memosPicsUpdated", JSON.stringify(memosPicsUpdated))

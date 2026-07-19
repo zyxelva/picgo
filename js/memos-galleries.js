@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
+    const memoUrl = memo.host + memo.path + "/memos?";
 
     //load bibi
     function memoTalks() {
@@ -57,31 +58,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //load Memos相册
     function memoAlbum(numb) {
-        var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=相册";
         let limit = numb || 8;
-
         var localalbumUpdated = JSON.parse(localStorage.getItem("albumUpdated")) || '';
         var localalbumData = JSON.parse(localStorage.getItem("albumData")) || '';
+
         if (localalbumData) {
             loadAlbum2(localalbumData, limit)
             console.log("memoAlbum 本地数据加载成功")
         } else {
             localStorage.setItem("albumUpdated", "")
         }
-        fetch(memoUrl).then(res => res.json()).then(resdata => {
-            var albumUpdated = resdata[0].updatedTs
-            if (albumUpdated && localalbumUpdated !== albumUpdated) {
-                var albumData = resdata
-                albumDom.innerHTML = "";
-                //开始布局
-                loadAlbum2(albumData, limit)
-                localStorage.setItem("albumUpdated", JSON.stringify(albumUpdated))
-                localStorage.setItem("albumData", JSON.stringify(albumData))
-                console.log("memoAlbum 热更新完成")
-            } else {
-                console.log("memoAlbum API 数据未更新")
-            }
-        });
+
+        fetch(leonus.procMemosUrl(memoUrl,"相册", limit, memo.username))
+            .then(res => res.json())
+            .then(resdata => {
+                const memoList = resdata.memos || [];
+                if (memoList.length === 0) {
+                    console.log("memoAlbum 没有匹配的相册备忘录");
+                    return;
+                }
+                const firstItem = memoList[0];
+                const albumUpdated = new Date(firstItem.updateTime).getTime();
+
+                if (albumUpdated && localalbumUpdated !== albumUpdated) {
+                    var albumData = memoList;
+                    albumDom.innerHTML = "";
+                    //开始布局
+                    loadAlbum2(albumData, limit)
+                    localStorage.setItem("albumUpdated", JSON.stringify(albumUpdated))
+                    localStorage.setItem("albumData", JSON.stringify(albumData))
+                    console.log("memoAlbum 热更新完成")
+                } else {
+                    console.log("memoAlbum API 数据未更新")
+                }
+            })
+            .catch(err => {
+                console.error("memoAlbum 请求失败：", err);
+            });
     }
 
     //loading
@@ -91,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const galleryAfter = `</div>`;
         albumDom.innerHTML = galleryBefore + html + galleryAfter
         window.Lately && Lately.init({target: '.photo-time'});
-
     }
 
     //memos module
@@ -102,35 +114,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //load Memos todos
     function memoTodo(numb) {
-        var memoUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=清单";
         let limit = numb || 30;
 
-        var localalbumUpdated = JSON.parse(localStorage.getItem("todoUpdatedTime")) || '';
-        var localalbumData = JSON.parse(localStorage.getItem("todoData")) || '';
-        if (localalbumData) {
-            loadTodo(localalbumData, limit)
-            console.log("memoAlbum 本地数据加载成功")
+        var localTodoUpdated = {};
+        if (localStorage.getItem("todoUpdatedTime")) {
+            localTodoUpdated = JSON.parse(localStorage.getItem("todoUpdatedTime")) || '';
+        }
+        var localTodoData = {};
+        if (localStorage.getItem("todoData")) {
+            localTodoData = JSON.parse(localStorage.getItem("todoData")) || '';
+        }
+        if (localTodoData && !leonus.isEmptyObj(localTodoData) ) {
+            loadTodo(localTodoData, limit)
+            console.log("memoTodo 本地数据加载成功")
         } else {
             localStorage.setItem("todoUpdatedTime", "")
         }
-        fetch(memoUrl).then(res => res.json()).then(resdata => {
-            var todoUpdatedTime = resdata[0].updatedTs
-            if (todoUpdatedTime && localalbumUpdated !== todoUpdatedTime) {
-                var todoData = resdata
+        fetch(leonus.procMemosUrl(memoUrl,"清单", limit, memo.username)).then(res => res.json()).then(resdata => {
+            const memoList = resdata.memos || [];
+            if (memoList.length === 0) {
+                console.log("memoTodo 没有匹配的相册备忘录");
+                return;
+            }
+            const firstItem = memoList[0];
+            const todoUpdatedTime = new Date(firstItem.updateTime).getTime();
+            if (todoUpdatedTime && localTodoUpdated !== todoUpdatedTime) {
+                var todoData = memoList
                 todoDom.innerHTML = "";
                 //开始布局
                 loadTodo(todoData, limit)
                 localStorage.setItem("todoUpdatedTime", JSON.stringify(todoUpdatedTime))
                 localStorage.setItem("todoData", JSON.stringify(todoData))
-                console.log("memoAlbum 热更新完成")
+                console.log("memoTodo 热更新完成")
             } else {
-                console.log("memoAlbum API 数据未更新")
+                console.log("memoTodo API 数据未更新")
             }
         });
     }
 
     function loadTodo(data, limit) {
-        var url = `${memos.host}${memos.path}?creatorId=${memos.creatorId}&tag=清单`;
         //去除```...```整个包裹内容
         const ANTI_REFS = /```([\W\w]+)```/g;
         let nowNum = 0;

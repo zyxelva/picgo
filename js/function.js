@@ -30,26 +30,26 @@ var leonus = {
     },
     //最终需要酱紫：![xxx](url)
     procMemosResources: (memosUrl, item) => {
-        if (!(item && item.resourceList && 0 < item.resourceList.length) || !memosUrl) {
+        if (!(item && item.attachments && 0 < item.attachments.length) || !memosUrl) {
             return '';
         }
         let content = item.content;
         //取最后一个空格后的值为标题
         let titleConts = content.replace("\n", '').split(' ');
         let title = titleConts[titleConts.length - 1];
-        let resourceList = item.resourceList;
+        let resourceList = item.attachments;
         let picsUrlLikeMd = '';
         for (var j = 0; j < resourceList.length; j++) {
             var restype = resourceList[j].type.slice(0, 5);
             var resexlink = resourceList[j].externalLink
             var resLink = '', fileId = '';
-            var createdDate = new Date(resourceList[j].createdTs * 1000);
+            var createdDate = new Date(resourceList[j].createTime);
             var dt = [createdDate.getFullYear(), createdDate.getMonth() + 1, createdDate.getDate()].join('-');
             if (resexlink) {
                 resLink = resexlink
             } else {
-                fileId = resourceList[j].publicId || resourceList[j].filename
-                resLink = memosUrl + 'o/r/' + resourceList[j].id + '/' + fileId
+                fileId = resourceList[j].name || resourceList[j].filename
+                resLink = memosUrl + memos.path + '/' + fileId
             }
             if (restype === 'image') {
                 if (!title) {
@@ -184,7 +184,7 @@ var leonus = {
                 }
             }
         }
-        var goodsUrl = memo.host + memo.path + "?creatorId=" + memo.creatorId + "&tag=好物";
+        var goodsUrl = memo.host + memo.path + "/memos?";
         var localalbumUpdated = JSON.parse(localStorage.getItem("goodsUpdated")) || '';
         var localalbumData = JSON.parse(localStorage.getItem("goodsData")) || '';
         if (localalbumData) {
@@ -193,10 +193,10 @@ var leonus = {
         } else {
             localStorage.setItem("goodsUpdated", "")
         }
-        fetch(goodsUrl).then(res => res.json()).then(resdata => {
-            var goodsUpdated = resdata[0].updatedTs
+        fetch(leonus.procMemosUrl(goodsUrl,"好物",limit, memos.username)).then(res => res.json()).then(resdata => {
+            var goodsData = resdata.memos;
+            var goodsUpdated = new Date(goodsData[0].updateTime).getTime();
             if (goodsUpdated && localalbumUpdated !== goodsUpdated) {
-                var goodsData = resdata
                 //开始布局
                 leonus.loadGoods(goodsData, limit, memo.host, goodsDom)
                 localStorage.setItem("goodsUpdated", JSON.stringify(goodsUpdated))
@@ -218,8 +218,8 @@ var leonus = {
                 var goodsCont = data[i].content.replace("#好物 \n", '')
                 var goodsConts = goodsCont.split(regex)
                 //解析memos内置资源文件(我一般不用memos上传图片，节省空间，用CDN或外链接)
-                if (data[i].resourceList && data[i].resourceList.length > 0) {
-                    var resourceList = data[i].resourceList;
+                if (data[i].attachments && data[i].attachments.length > 0) {
+                    var resourceList = data[i].attachments;
                     for (var j = 0; j < resourceList.length; j++) {
                         var restype = resourceList[j].type.slice(0, 5);
                         var resexlink = resourceList[j].externalLink
@@ -245,8 +245,6 @@ var leonus = {
                 nowNum++;
             }
         }
-        var goodsBefore = ``
-        var goodsAfter = ``
         resultAll = result
         goodsDom.innerHTML = resultAll
 
@@ -582,5 +580,48 @@ var leonus = {
         }
         localStorage.setItem("memoLock", v);
         document.querySelector("#lock-now").value = tv;
+    },
+    /**
+     * 处理memosUrl
+     * @param host 域名
+     * @param tag 标签：相册、好物、学习等
+     * @param limit 分页大小
+     */
+    procMemosUrl: (memoUrl, tag, limit, creatorName)=>{
+        if (!memoUrl){
+            console.log('memoUrl of memos or memosDomain is null.');
+            return
+        }
+        if (!tag){
+            console.log('tag of memos or memosDomain is null.');
+            return
+        }
+        if (!limit){
+            console.log('limit of memos or memosDomain is null.');
+            return
+        }
+        if (!creatorName){
+            console.log('creatorName of memos or memosDomain is null.');
+            return
+        }
+        let creator='users/'+creatorName;
+        // var memoUrl = memos.host + memo.path + "/memos?";
+        const visibilityMode = "PUBLIC";
+        // const creatorName = "users/" + memo.username;
+
+        const params = new URLSearchParams();
+        // 模板字符串拼接CEL过滤条件（变量正常生效）
+        const filterStr = `creator == "${creator}" && "${tag}" in tags && visibility=="${visibilityMode}"`;
+        params.append("filter", filterStr);
+        params.append("pageSize", limit.toString());
+
+        return `${memoUrl}${params.toString()}`;
+    },
+    //Object判空处理
+    isEmptyObj: (obj) => {
+        // 先排除 null/undefined，避免报错
+        if (obj === null || typeof obj !== "object")
+            return true;
+        return Object.keys(obj).length === 0;
     }
 };
