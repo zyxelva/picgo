@@ -179,7 +179,7 @@ function getOne(memosId) {
     if (localStorage.getItem('apiUrl')) {
         apiUrl = localStorage.getItem('apiUrl')
         $("#randomlist").html('').hide()
-        var getUrl = apiUrl.replace(/api\/v1\/memo(.*)/, memos.path + '/' + memosId + '$1')
+        var getUrl = apiUrl.concat('/' + memosId)
         $.get(getUrl, function (data) {
             updateHTMl([data], true)
         });
@@ -471,7 +471,7 @@ function sendText() {
             }
         }
         $.ajax({
-            url: apiUrl,
+            url: apiUrl+"/memos",
             type: "POST",
             data: JSON.stringify({
                 'content': content,
@@ -484,7 +484,7 @@ function sendText() {
             dataType: "json",
             success: function (result) {
                 //发送成功
-                getOne(result.id)
+                getOne(result.name)
                 document.querySelector(".memos-image-list").innerHTML = '';
                 localStorage.removeItem("memos-resource-list");
                 localStorage.removeItem("resourceIdList");

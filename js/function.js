@@ -510,8 +510,8 @@ var leonus = {
         var editMemoDom = document.querySelector('.edit-memos');
         let memoBody = {
             content: document.querySelector(".common-editor-inputer").value,
-            relationList: [],
-            resourceIdList: JSON.parse(localStorage.getItem("resourceIdList")),
+            // relationList: [],
+            // resourceIdList: JSON.parse(localStorage.getItem("resourceIdList")),
             visibility: localStorage.getItem("memoLock")
         }
         fetch(memoUrl, {

@@ -38,9 +38,15 @@ window.onresize = () => {
 
 // 函数
 function photos(memoUrl) {
-    var localAlbumUpdated = JSON.parse(localStorage.getItem("memosPicsUpdated")) || '';
-    var localAlbumData = JSON.parse(localStorage.getItem("memosPicsData")) || '';
-    if (localAlbumData) {
+    let localAlbumUpdated = '';
+    if (localStorage.getItem("memosPicsUpdated")) {
+        localAlbumUpdated = JSON.parse(localStorage.getItem("memosPicsUpdated")) || '';
+    }
+    let localAlbumData = '';
+    if (localStorage.getItem("memosPicsData")) {
+        localAlbumData = JSON.parse(localStorage.getItem("memosPicsData")) || '';
+    }
+    if (localAlbumData && !leonus.isEmptyObj(localAlbumData) ) {
         loadAlbum2(localAlbumData, limit)
         console.log("memosPics 本地数据加载成功")
     } else {
