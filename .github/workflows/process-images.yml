@@ -1,0 +1,34 @@
+name: Process Images and Generate Footprints JSON
+
+on:
+  push:
+    paths:
+      - 'source/images/Footprint/**'  # 图片目录
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  extract-metadata:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install exifr
+
+      - name: Run metadata extraction
+        run: node scripts/extract-metadata.js
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "zyxelva"
+          git config user.email "zyxelva@gmail.com"
+          git add source/data/footprints.json
+          git diff --staged --quiet || git commit -m "chore: auto-update footprints data from images"
+          git push
