@@ -39,7 +39,12 @@ jobs:
           echo "Contents of ./images/Footprint (if exists):"
           ls -la ./images/Footprint/ || echo "./images/Footprint/ does not exist"
 
+      - name: Install dependencies   # <--- 需要添加这一步
+        run: npm install
+
       - name: Run metadata extraction
+        env:
+          AMAP_API_KEY: ${{ secrets.AMAP_API_KEY }}   # 从 Secrets 读取
         run: node scripts/extract-image-metadata.js
 
       - name: Commit and push changes

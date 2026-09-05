@@ -1,0 +1,15 @@
+{
+  "name": "picgo-footprint",
+  "version": "1.0.0",
+  "description": "Auto extract image metadata and generate footprint JSON for Hexo blog",
+  "main": "scripts/extract-image-metadata.js",
+  "scripts": {
+    "extract": "node scripts/extract-image-metadata.js"
+  },
+  "author": "zyxelva",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "exifr": "^7.1.3"
+  }
+}
