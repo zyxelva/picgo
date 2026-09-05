@@ -18,6 +18,10 @@ const MARKER_COLORS = ['sunset', 'ocean', 'violet', 'forest', 'amber', 'citrus']
 
 // ============ 工具函数 ============
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /** 判断文件是否为图片 */
 function isImageFile(filename) {
     const ext = path.extname(filename).toLowerCase();
@@ -74,13 +78,14 @@ function getRandomMarkerColor() {
 // ============ 反向地理编码（高德 API） ============
 
 /**
- * 调用高德逆地理编码 API，获取中文地名
+ * 调用高德逆地理编码 API，获取中文地名（增强版：IPv4、超时、重试）
  * @param {number} lat - 纬度
  * @param {number} lng - 经度
  * @param {string} apiKey - 高德 Web 服务 API Key
- * @returns {Promise<string>} 返回地点名称（如 "天安门广场"）
+ * @param {number} retries - 重试次数（默认 1）
+ * @returns {Promise<string|null>} 返回地点名称，失败返回 null
  */
-async function getLocationName(lat, lng, apiKey) {
+async function getLocationName(lat, lng, apiKey, retries = 1) {
     if (!apiKey) {
         console.warn('⚠️ 未提供高德 API Key，跳过地名获取。');
         return null;
@@ -88,24 +93,41 @@ async function getLocationName(lat, lng, apiKey) {
 
     const url = `https://restapi.amap.com/v3/geocode/regeo?key=${apiKey}&location=${lng},${lat}&extensions=base`;
 
-    try {
-        const response = await axios.get(url);
-        const data = response.data;
+    const makeRequest = async (attempt) => {
+        try {
+            const response = await axios.get(url, {
+                timeout: 10000,          // 10 秒超时
+                family: 4,               // 强制使用 IPv4（解决 IPv6 不通的问题）
+                // 可选：添加 User-Agent 模拟浏览器（某些服务需要）
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+            const data = response.data;
 
-        if (data.status === '1' && data.regeocode) {
-            const addr = data.regeocode.addressComponent;
-            // 优先返回乡镇/街道，其次区/县，最后格式化地址
-            if (addr.township) return addr.township;
-            if (addr.district) return addr.district;
-            return data.regeocode.formatted_address || null;
-        } else {
-            console.warn(`⚠️ 高德 API 返回错误 (${lng}, ${lat}): ${data.info}`);
-            return null;
+            if (data.status === '1' && data.regeocode) {
+                const addr = data.regeocode.addressComponent;
+                return data.regeocode.formatted_address || null;
+            } else {
+                console.warn(`⚠️ 高德 API 返回错误 (${lng}, ${lat}): ${data.info}`);
+                return null;
+            }
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.info === 'CUQPS_HAS_EXCEEDED_THE_LIMIT') {
+                console.warn(`⏳ 触发QPS限流，等待 5 秒后重试...`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                return getLocationName(lat, lng, apiKey, retries); // 重新尝试
+            }
+            if (attempt < retries) {
+                console.warn(`⏳ 高德 API 请求失败 (${attempt + 1}/${retries + 1})，1秒后重试...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return makeRequest(attempt + 1);
+            } else {
+                console.error(`❌ 调用高德 API 失败 (${lng}, ${lat}):`, error.message);
+                return null;
+            }
         }
-    } catch (error) {
-        console.error(`❌ 调用高德 API 失败 (${lng}, ${lat}):`, error.message);
-        return null;
-    }
+    };
+
+    return makeRequest(0);
 }
 
 // ============ 核心处理函数 ============
@@ -218,6 +240,8 @@ async function scanDirectory(dirPath, amapKey) {
         console.log(`处理: ${file}`);
         const result = await processImage(fullPath, amapKey);
         results.push(result);
+        // 每处理一张图片后，等待 500 毫秒 (0.5秒)，将 QPS 控制在 2 以下
+        await sleep(500);
     }
 
     return results;
