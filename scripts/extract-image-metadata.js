@@ -6,7 +6,7 @@ const axios = require('axios'); // 新增
 // ============ 配置 ============
 const IMAGE_DIR = './images/Footprint';
 const OUTPUT_JSON = './data/footprints.json';
-const DEFAULT_COORDS = { latitude: 23.1291, longitude: 113.2644 };
+const DEFAULT_COORDS = {latitude: 23.1291, longitude: 113.2644};
 const CDN_BASE = 'https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/';
 const DEFAULT_URL_LABEL = '游记';
 
@@ -167,9 +167,11 @@ async function processImage(filePath, amapKey) {
         // 随机选择 markerColor
         const markerColor = getRandomMarkerColor();
 
+        // 在 return 之前：
+        const finalName = typeof locationName === 'string' && locationName.trim() ? locationName : generateName(filename);
         // 构建 location 对象
         return {
-            name: locationName,
+            name: finalName,
             coordinates: `${finalLng.toFixed(4)},${finalLat.toFixed(4)}`,
             date: date || '',
             url: '',
@@ -239,13 +241,18 @@ async function main() {
     const locations = await scanDirectory(IMAGE_DIR, amapKey);
 
     // 按名称排序
-    locations.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+    // 按名称排序（安全处理非字符串）
+    locations.sort((a, b) => {
+        const nameA = String(a.name || '');
+        const nameB = String(b.name || '');
+        return nameA.localeCompare(nameB, 'zh');
+    });
 
-    const output = { locations };
+    const output = {locations};
 
     const outputDir = path.dirname(OUTPUT_JSON);
     if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
+        fs.mkdirSync(outputDir, {recursive: true});
     }
 
     fs.writeFileSync(OUTPUT_JSON, JSON.stringify(output, null, 2), 'utf-8');
