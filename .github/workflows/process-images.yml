@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: 配置 Git 环境
-          env:
-            GIT_NAME: ${{ secrets.GIT_NAME }}
-            GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
-            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        env:
+          GIT_NAME: ${{ secrets.GIT_NAME }}
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
