@@ -11,8 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 配置 Git 环境
+          env:
+            GIT_NAME: ${{ secrets.GIT_NAME }}
+            GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: $GH_TOKEN   # 使用 PAT
+          cache: 'npm' # 启用缓存加速安装
 
       - name: Debug - list files
         run: |
@@ -32,8 +41,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config user.name "zyxelva"
-          git config user.email "zyxelva@gmail.com"
+          git config --global user.name $GIT_NAME
+          git config --global user.email $GIT_EMAIL
           git add source/data/footprints.json
           git diff --staged --quiet || git commit -m "chore: auto-update footprints data from images"
           git push
