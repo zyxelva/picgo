@@ -1,0 +1,130 @@
+{
+  "locations": [
+    {
+      "name": "六片山",
+      "coordinates": "113.3408,23.2536",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/六片山.JPG"
+      ]
+    },
+    {
+      "name": "牛古嶂",
+      "coordinates": "113.8552,23.5680",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/牛古嶂.JPG"
+      ]
+    },
+    {
+      "name": "蒲台岛",
+      "coordinates": "114.2590,22.1624",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/蒲台岛.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "114.6217,23.6116",
+      "date": "2015",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/1.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "113.1357,23.7035",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/2.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "113.2800,25.9096",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/3.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "114.9036,22.9240",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/4.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "113.3245,23.1064",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/5.JPG"
+      ]
+    },
+    {
+      "name": "未命名地点",
+      "coordinates": "114.1599,27.4739",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/6.JPG"
+      ]
+    }
+  ]
+}
