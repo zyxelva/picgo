@@ -1,6 +1,20 @@
 {
   "locations": [
     {
+      "name": "巴伐利亚庄园",
+      "coordinates": "114.6217,23.6116",
+      "date": "2015",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "violet",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/巴伐利亚庄园.JPG"
+      ]
+    },
+    {
       "name": "六片山",
       "coordinates": "113.3408,23.2536",
       "date": "2017",
@@ -9,7 +23,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "citrus",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/六片山.JPG"
       ]
@@ -23,7 +37,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "violet",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/牛古嶂.JPG"
       ]
@@ -37,23 +51,9 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "amber",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/蒲台岛.JPG"
-      ]
-    },
-    {
-      "name": "未命名地点",
-      "coordinates": "114.6217,23.6116",
-      "date": "2015",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "ocean",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/1.JPG"
       ]
     },
     {
@@ -79,7 +79,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "forest",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/3.JPG"
       ]
@@ -93,7 +93,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "forest",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/4.JPG"
       ]
@@ -107,7 +107,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "forest",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/5.JPG"
       ]
@@ -121,7 +121,7 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "ocean",
+      "markerColor": "sunset",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/6.JPG"
       ]
