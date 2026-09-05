@@ -11,14 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 配置 Git 环境
-        env:
-          GIT_NAME: ${{ secrets.GIT_NAME }}
-          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - name: Checkout repository
         uses: actions/checkout@v4
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           token: $GH_TOKEN   # 使用 PAT
           cache: 'npm' # 启用缓存加速安装
@@ -40,6 +36,9 @@ jobs:
         run: node scripts/extract-image-metadata.js
 
       - name: Commit and push changes
+        env:
+          GIT_NAME: ${{ secrets.GIT_NAME }}
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
         run: |
           git config --global user.name $GIT_NAME
           git config --global user.email $GIT_EMAIL
