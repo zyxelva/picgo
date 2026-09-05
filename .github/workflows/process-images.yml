@@ -3,21 +3,20 @@ name: Process Images and Generate Footprints JSON
 on:
   push:
     paths:
-      - 'source/images/Footprint/**'  # 图片目录
-  workflow_dispatch:  # 允许手动触发
+      - 'source/images/Footprint/**'
+  workflow_dispatch:
 
 jobs:
   extract-metadata:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 如果使用默认 GITHUB_TOKEN 则需此项，若用 PAT 可省略
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          token: $GH_TOKEN   # 使用 PAT
-          cache: 'npm' # 启用缓存加速安装
+          token: ${{ secrets.GH_TOKEN }}   # 用 PAT 检出
 
       - name: Debug - list files
         run: |
@@ -27,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install exifr
@@ -39,9 +38,11 @@ jobs:
         env:
           GIT_NAME: ${{ secrets.GIT_NAME }}
           GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git config --global user.name $GIT_NAME
-          git config --global user.email $GIT_EMAIL
+          git config --global user.name "$GIT_NAME"
+          git config --global user.email "$GIT_EMAIL"
+          git remote set-url origin https://${GH_TOKEN}@github.com/zyxelva/picgo.git
           git add source/data/footprints.json
           git diff --staged --quiet || git commit -m "chore: auto-update footprints data from images"
           git push
