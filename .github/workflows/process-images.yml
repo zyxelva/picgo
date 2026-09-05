@@ -23,7 +23,7 @@ jobs:
         run: npm install exifr
 
       - name: Run metadata extraction
-        run: node scripts/extract-metadata.js
+        run: node scripts/extract-image-metadata.js
 
       - name: Commit and push changes
         run: |
