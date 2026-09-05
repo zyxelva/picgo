@@ -3,8 +3,8 @@ const path = require('path');
 const exifr = require('exifr');
 
 // ============ 配置 ============
-const IMAGE_DIR = 'source/images/Footprint';  // 图片存放目录
-const OUTPUT_JSON = 'source/data/footprints.json';  // 输出 JSON 路径
+const IMAGE_DIR = '../images/Footprint';  // 图片存放目录
+const OUTPUT_JSON = '../data/footprints.json';  // 输出 JSON 路径
 const DEFAULT_COORDS = { latitude: 23.1291, longitude: 113.2644 };  // 默认广州坐标[reference:2]
 const CDN_BASE = 'https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/';
 const DEFAULT_URL_LABEL = '游记';

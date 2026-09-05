@@ -31,6 +31,14 @@ jobs:
       - name: Install dependencies
         run: npm install exifr
 
+      - name: Debug - list directories
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents of source/images:"
+          ls -la source/images/ || echo "source/images/ does not exist"
+          echo "Contents of source/images/Footprint (if exists):"
+          ls -la source/images/Footprint/ || echo "source/images/Footprint/ does not exist"
+
       - name: Run metadata extraction
         run: node scripts/extract-image-metadata.js
 
