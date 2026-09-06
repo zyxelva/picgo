@@ -1,21 +1,7 @@
 {
   "locations": [
     {
-      "name": "巴伐利亚庄园",
-      "coordinates": "114.6217,23.6116",
-      "date": "2015",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "violet",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/巴伐利亚庄园.JPG"
-      ]
-    },
-    {
-      "name": "六片山",
+      "name": "广东省广州市白云区龙归街道六片山白云山原始森林公园",
       "coordinates": "113.3408,23.2536",
       "date": "2017",
       "url": "",
@@ -23,83 +9,13 @@
       "categories": [
         "去过"
       ],
-      "markerColor": "citrus",
+      "markerColor": "amber",
       "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/六片山.JPG"
       ]
     },
     {
-      "name": "牛古嶂",
-      "coordinates": "113.8552,23.5680",
-      "date": "2017",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "citrus",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/牛古嶂.JPG"
-      ]
-    },
-    {
-      "name": "蒲台岛",
-      "coordinates": "114.2590,22.1624",
-      "date": "2017",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "sunset",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/蒲台岛.JPG"
-      ]
-    },
-    {
-      "name": "未命名地点",
-      "coordinates": "113.1357,23.7035",
-      "date": "2017",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "citrus",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/2.JPG"
-      ]
-    },
-    {
-      "name": "未命名地点",
-      "coordinates": "113.2800,25.9096",
-      "date": "2017",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "sunset",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/3.JPG"
-      ]
-    },
-    {
-      "name": "未命名地点",
-      "coordinates": "114.9036,22.9240",
-      "date": "2017",
-      "url": "",
-      "urlLabel": "游记",
-      "categories": [
-        "去过"
-      ],
-      "markerColor": "citrus",
-      "photos": [
-        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/4.JPG"
-      ]
-    },
-    {
-      "name": "未命名地点",
+      "name": "广东省广州市海珠区赤岗街道广州塔",
       "coordinates": "113.3245,23.1064",
       "date": "2017",
       "url": "",
@@ -113,9 +29,23 @@
       ]
     },
     {
-      "name": "未命名地点",
-      "coordinates": "114.1599,27.4739",
+      "name": "广东省广州市增城区派潭镇牛牯嶂",
+      "coordinates": "113.8552,23.5680",
       "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "violet",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/牛古嶂.JPG"
+      ]
+    },
+    {
+      "name": "广东省河源市源城区高埔岗街道龙岭五路富德祺家·巴伐利亚庄园",
+      "coordinates": "114.6217,23.6116",
+      "date": "2015",
       "url": "",
       "urlLabel": "游记",
       "categories": [
@@ -123,7 +53,77 @@
       ],
       "markerColor": "sunset",
       "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/巴伐利亚庄园.JPG"
+      ]
+    },
+    {
+      "name": "广东省惠州市惠东县多祝镇大南山",
+      "coordinates": "114.9036,22.9240",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "amber",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/4.JPG"
+      ]
+    },
+    {
+      "name": "广东省清远市清城区洲心街道北江小三峡五一码头",
+      "coordinates": "113.1357,23.7035",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "violet",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/2.JPG"
+      ]
+    },
+    {
+      "name": "湖南省郴州市资兴市东江街道东江湖景区-小东江景区",
+      "coordinates": "113.2800,25.9096",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "violet",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/3.JPG"
+      ]
+    },
+    {
+      "name": "江西省萍乡市芦溪县麻田镇石地武功山风景名胜区金顶景区",
+      "coordinates": "114.1599,27.4739",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "ocean",
+      "photos": [
         "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/6.JPG"
+      ]
+    },
+    {
+      "name": "香港特别行政区离岛区蒲台岛",
+      "coordinates": "114.2590,22.1624",
+      "date": "2017",
+      "url": "",
+      "urlLabel": "游记",
+      "categories": [
+        "去过"
+      ],
+      "markerColor": "violet",
+      "photos": [
+        "https://gcore.jsdelivr.net/gh/zyxelva/picgo/images/Footprint/蒲台岛.JPG"
       ]
     }
   ]
